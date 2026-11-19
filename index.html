@@ -5183,9 +5183,9 @@ async function admImportFile(file){if(!file)return;try{const d=JSON.parse(await 
 let PDFJS=null;
 function loadPdfJs(){if(PDFJS)return Promise.resolve(PDFJS);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{PDFJS=window.pdfjsLib;PDFJS.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';res(PDFJS)};s.onerror=()=>rej(new Error('تعذر تحميل قارئ PDF'));document.head.appendChild(s)})}
 function adPdfCard(){const A=V.ad,P=A.pdf||{};
- return `<div class="cfg pdfc"><div class="cfgh"><b>${I('download',18)} رفع ملف PDF أو صور الأسئلة</b></div>
+ return `<div class="cfg pdfc"><div class="cfgh"><b>${I('download',18)} رفع ملف الأسئلة (TXT أو PDF أو صور)</b></div>
  <p class="muted2">ارفع ملف الأسئلة (وزاري، ملزمة، امتحان) — حتى لو صور ممسوحة. الموقع يقرأ الأسئلة والأجوبة ويحوّلها لأسئلة جاهزة تنزل بالمربع تحت حتى تراجعها قبل الإضافة.</p>
- <input type="file" id="pdff" accept="application/pdf,image/*" multiple ${P.busy?'disabled':''} onchange="admPdf(this.files)">
+ <input type="file" id="pdff" accept="application/pdf,image/*,.txt,text/plain" multiple ${P.busy?'disabled':''} onchange="admPdf(this.files)">
  <div class="adpick" style="padding:0;margin-top:10px;align-items:center"><label class="ck" style="flex:1"><input type="checkbox" ${A.pdfWz?'checked':''} onchange="V.ad.pdfWz=this.checked;render()"><span>أسئلة وزارية</span></label>${A.pdfWz?`<input class="inp" style="max-width:150px" placeholder="السنة والدور: ٢٠٢٣ د١" value="${esc(A.pdfYr||'')}" oninput="V.ad.pdfYr=this.value">`:''}</div>
  <label class="ck" style="margin-top:6px"><input type="checkbox" ${A.pdfGen!==false?'checked':''} onchange="V.ad.pdfGen=this.checked"><span>إذا السؤال ما له جواب بالملف، اكتب إجابة نموذجية تلقائياً</span></label>
  ${P.busy?`<div class="pdfp"><div class="prog"><i style="width:${Math.round((P.done||0)/(P.total||1)*100)}%"></i></div><small>${esc(P.msg||'')}</small></div>`:P.msg?`<div class="note ${P.err?'':'ok'}" style="margin:10px 0 0">${esc(P.msg)}</div>`:''}
@@ -5222,6 +5222,12 @@ function qToLine(q,yr,wzAll){
 }
 async function admPdf(files){
  const A=V.ad;files=[...(files||[])];if(!files.length)return;
+ // ملفات نص جاهزة (txt): تنقرى مباشرة بدون ذكاء اصطناعي
+ const txts=files.filter(f=>/\.txt$/i.test(f.name)||f.type==='text/plain');
+ if(txts.length){let t='';for(const f of txts)t+=(await f.text())+'\n';A.imp=((A.imp||'').trim()+'\n'+t).trim();
+  const n=admParseBulk(A.imp,{grades:[A.g],sub:A.s,unit:A.impU||'أسئلة مضافة',les:null}).length;
+  pdfSt({busy:0,msg:`انقرى الملف: تم التعرف على ${toAr(n)} سؤال. راجعهن بالمربع واضغط «أضف».`,err:!n});
+  files=files.filter(f=>!txts.includes(f));const fi=document.getElementById('pdff');if(fi)fi.value='';if(!files.length)return}
  pdfSt({busy:1,done:0,total:1,msg:'جاري فتح الملف…',err:0});
  try{
   const pages=await filesToPages(files);if(!pages.length)throw new Error('ما لگيت صفحات بالملف');
@@ -5237,6 +5243,8 @@ async function admPdf(files){
    const lines=[];r.data.questions.forEach(q=>{const un=q.unit&&us.includes(q.unit)?q.unit:null;if(un&&un!==lastU){lines.push('@'+un);lastU=un}const L=qToLine(q,A.pdfYr||q.year||'',!!A.pdfWz);if(L){lines.push(L);total++}});
    if(lines.length)A.imp=(A.imp?A.imp.trim()+'\n':'')+lines.join('\n');
   }
+  if(!total&&fails===batches.length){const txt=pages.filter(p=>p.text).map(p=>p.text).join('\n\n');if(txt)A.imp=(A.imp?A.imp+'\n':'')+txt;
+   pdfSt({busy:0,err:1,msg:'القراءة الذكية ما اشتغلت (دالة extract مو منشورة بـ Supabase أو مفتاح Anthropic ناقص). '+(txt?'نزّلت نص الملف بالمربع حتى ترتبه.':'الملف صور ممسوحة، فيحتاج القراءة الذكية.')});return}
   pdfSt({busy:0,msg:`تم التعرف على ${toAr(total)} سؤال ونزلن بالمربع تحت. راجعهن وعدّل اللي تريده، بعدين اضغط «أضف».${fails?` (${toAr(fails)} جزء ما انقرى — جرّب ترفعه مرة ثانية)`:''}`,err:!total});
  }catch(e){pdfSt({busy:0,msg:'خطأ: '+(e.message||e),err:1})}
  const fi=document.getElementById('pdff');if(fi)fi.value='';
