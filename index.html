@@ -577,6 +577,7 @@ textarea.xa{min-height:64px;line-height:1.7}
 .pdfc{border:2px dashed color-mix(in srgb,var(--brand) 40%,transparent)!important}
 .pdfp{margin-top:12px}.pdfp small{display:block;margin-top:6px;color:var(--ink2);font-size:12.5px}
 .pdfp .prog{height:8px;border-radius:9px;background:var(--surface2);overflow:hidden}.pdfp .prog i{display:block;height:100%}
+.sqlc{display:block;background:var(--surface2);border-radius:10px;padding:10px;font-size:12px;word-break:break-all;font-family:ui-monospace,monospace}
 </style>
 </head>
 <body>
@@ -4826,17 +4827,34 @@ function adTitleBar(){return `<div class="adtop"><button class="x" onclick="loca
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
- if(SB&&!ADM.isAdmin)return `${adTitleBar()}<div class="note" style="margin:16px">${I('alert',18)} هذا الحساب ليس مديراً. أضف معرّفه في جدول admins داخل Supabase (الطريقة مكتوبة بملف README).</div>`;
+ if(SB&&!ADM.isAdmin){const sql=`insert into public.admins (user_id) select id from auth.users where email = '${ADM.user.email}' on conflict do nothing;`;return `${adTitleBar()}<div class="cfg" style="margin:16px"><div class="cfgh"><b>دخلت، بس الحساب بعده مو مدير</b></div>
+ ${ADM.aerr?`<div class="note" style="margin:0 0 10px">${I('alert',18)} ${esc(ADM.aerr)}</div>`:''}
+ <p class="muted2">آخر خطوة: بـ Supabase افتح <b>SQL Editor</b> ← <b>New query</b>، الصق هذا السطر (مكتوب بيه رقم حسابك جاهز) واضغط <b>Run</b>، بعدين ارجع واضغط «تحقق».</p>
+ <code class="sqlc" dir="ltr">${esc(sql)}</code>
+ <div class="adpick" style="padding:0;margin-top:10px"><button class="btns" onclick="navigator.clipboard.writeText(${JSON.stringify(sql).replace(/"/g,'&quot;')}).then(()=>toast('انتسخ ✓'))">${I('file',16)} نسخ السطر</button><button class="btnp" onclick="admSession().then(()=>{if(ADM.isAdmin)AST.load().then(()=>{admRebuild();render()});else{toast('بعده مو مدير');render()}})">تحقق</button></div>
+ <button class="chip" style="margin-top:10px" onclick="admLogout()">تسجيل خروج</button></div>`}
  const A=V.ad;if(!A.s||!adSubs(A.g).includes(A.s))A.s=adSubs(A.g)[0];
  const body={ui:adUI,dash:adDash,qs:adQs,add:adAdd,import:adImport,struct:adStruct,units:adUnits,papers:adPapers,exam:adExam,results:adResults,backup:adBackup}[A.t]||adDash;
  return `<div class="adm">${adTitleBar()}<div class="adtabs">${AT.map(t=>`<button class="${A.t===t[0]?'on':''}" onclick="V.ad.t='${t[0]}';render()">${I(t[2],16)}${t[1]}</button>`).join('')}</div><div class="adbody">${body()}</div></div>`;
 }
 function adLoginV(){return `${adTitleBar()}<div class="cfg" style="margin:16px;max-width:420px;margin-inline:auto"><div class="cfgh"><b>تسجيل دخول المدير</b></div>
- <input class="inp" id="ae" type="email" placeholder="البريد الإلكتروني" style="margin-bottom:8px"><input class="inp" id="ap" type="password" placeholder="كلمة المرور">
- <div style="height:12px"></div><button class="btnp" onclick="admLogin()">دخول</button><p class="muted2" style="margin-top:10px">ينشأ حساب المدير من Supabase → Authentication → Users، ثم يضاف معرّفه لجدول admins.</p></div>`}
-async function admLogin(){try{const {data,error}=await SB.auth.signInWithPassword({email:$('#ae').value.trim(),password:$('#ap').value});if(error)throw error;await admSession();render()}catch(e){toast('فشل الدخول: '+(e.message||e))}}
+ <input class="inp" id="ae" type="email" dir="ltr" placeholder="البريد الإلكتروني" value="${esc(V.ad.le||'')}" style="margin-bottom:8px"><input class="inp" id="ap" type="password" placeholder="كلمة المرور">
+ ${V.ad.lerr?`<div class="note" style="margin:10px 0 0">${I('alert',18)} ${esc(V.ad.lerr)}</div>`:''}<div style="height:12px"></div><button class="btnp" ${V.ad.lbusy?'disabled':''} onclick="admLogin()">${V.ad.lbusy?'جاري الدخول…':'دخول'}</button><p class="muted2" style="margin-top:10px">ينشأ حساب المدير من Supabase → Authentication → Users، ثم يضاف معرّفه لجدول admins.</p></div>`}
+function admErrAr(m){m=String(m||'');
+ if(/Invalid login credentials/i.test(m))return 'الإيميل أو كلمة السر غلط. تأكد إنك سويت المستخدم بـ Supabase ← Authentication ← Users بنفس الإيميل، وإذا ناسي كلمة السر احذف المستخدم وسوّه من جديد.';
+ if(/Email not confirmed/i.test(m))return 'الإيميل غير مؤكد. بـ Supabase ← Authentication ← Users احذف المستخدم وسوّه من جديد مع تأشير Auto Confirm User.';
+ if(/Invalid API key|apikey|JWT|401/i.test(m))return 'مفتاح Supabase بملف config.js غلط. انسخ anon public key من جديد (Project Settings ← API) وحطه بـ config.js.';
+ if(/Failed to fetch|NetworkError|fetch/i.test(m))return 'ما گدر يتصل بـ Supabase. تأكد من SUPABASE_URL بملف config.js (يبدي بـ https:// وينتهي بـ .supabase.co) ومن النت.';
+ if(/does not exist|relation|schema cache/i.test(m))return 'جداول الإدارة مو موجودة. شغّل ملف schema.sql كامل بـ Supabase ← SQL Editor.';
+ return m}
+async function admLogin(){const e=$('#ae').value.trim(),p=$('#ap').value;V.ad.le=e;if(!e||!p){V.ad.lerr='اكتب الإيميل وكلمة السر';return render()}
+ V.ad.lerr='';V.ad.lbusy=1;render();
+ try{const {error}=await SB.auth.signInWithPassword({email:e,password:p});if(error)throw error;await admSession()}catch(x){V.ad.lerr=admErrAr(x.message||x)}
+ V.ad.lbusy=0;render()}
 async function admLogout(){try{await SB.auth.signOut()}catch(e){}ADM.user=null;ADM.isAdmin=false;render()}
-async function admSession(){if(!SB)return;try{const {data}=await SB.auth.getUser();ADM.user=data&&data.user||null;if(ADM.user){const r=await SB.from('admins').select('user_id').eq('user_id',ADM.user.id).maybeSingle();ADM.isAdmin=!!(r&&r.data)}}catch(e){}}
+async function admSession(){if(!SB)return;try{const {data}=await SB.auth.getUser();ADM.user=data&&data.user||null;if(ADM.user){let ok=false,err='';try{const q=await SB.rpc('is_admin');if(q&&q.data===true)ok=true;else if(q&&q.error)err=q.error.message}catch(e){}
+ if(!ok){const r=await SB.from('admins').select('user_id').eq('user_id',ADM.user.id).maybeSingle();ok=!!(r&&r.data);if(r&&r.error)err=r.error.message}
+ ADM.isAdmin=ok;ADM.aerr=!ok&&err?admErrAr(err):''}}catch(e){ADM.aerr=admErrAr(e.message||e)}}
 async function admSave(msg){try{await AST.saveCfg();admRebuild();toast(msg||'تم الحفظ ✓')}catch(e){toast('خطأ بالحفظ: '+(e.message||e))}render()}
 const selG=(v,on)=>`<select class="inp sel" onchange="${on}">${G0.map(st=>`<optgroup label="${st.s}">${st.g.map(x=>`<option value="${x[0]}" ${v===x[0]?'selected':''}>${GR[x[0]].n}${GR[x[0]].hide?' (مخفي)':''}</option>`).join('')}</optgroup>`).join('')}</select>`;
 const selS=(gk,v,on)=>`<select class="inp sel" onchange="${on}">${adSubs(gk).map(s=>`<option value="${s}" ${v===s?'selected':''}>${SUB[s].n}</option>`).join('')}</select>`;
