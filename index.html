@@ -4016,7 +4016,7 @@ function gradeItem(it,v){
  const mk=it.mk;if(v===undefined||v===null||String(v).trim()==='')return 0;
  if(it.k==='mcq')return +v===it.a?mk:0;
  if(it.k==='tf')return (v==='t')===it.a?mk:0;
- if(it.k==='calc'){const x=parseFloat(nz(v).replace(/[^0-9.\-]/g,''));if(isNaN(x))return 0;return Math.abs(x-it.ans)<=Math.max(it.tol||.01,Math.abs(it.ans)*.02)?mk:0}
+ if(it.k==='calc'){let s=String(v).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[−–—]/g,'-').replace(/[٫,]/g,'.').replace(/[^0-9.\-]/g,'');const neg=/-/.test(s);s=s.replace(/-/g,'');const x=(neg?-1:1)*parseFloat(s);if(isNaN(x))return 0;return Math.abs(x-it.ans)<=Math.max(it.tol||.01,Math.abs(it.ans)*.02)?mk:0}
  if(it.k==='dna'){return nz(v).replace(/[^a-z]/g,'')===nz(it.ans).replace(/[^a-z]/g,'')?mk:0}
  const u=nz(v),at=toks(v);
  if(it.k==='blank'||it.k==='ext'){
@@ -4161,7 +4161,7 @@ const GEN={
  det2:()=>{const a=R(1,6),b=R(1,6),c=R(1,6),d=R(1,6);return{q:`جد قيمة المحدد: | ${a}  ${b} ; ${c}  ${d} |`,ans:a*d-b*c,l:1}},
  prob:()=>{const p=pick([['ظهور عدد زوجي عند رمي حجر نرد',0.5],['ظهور الصورة عند رمي قطعة نقود',0.5],['ظهور العدد ٦ عند رمي حجر نرد (لأقرب منزلتين)',0.17],['ظهور عدد أقل من ٣ عند رمي حجر نرد (لأقرب منزلتين)',0.33]]);return{q:`جد احتمال ${p[0]}`,ans:p[1],tol:.01}},
  cmod:()=>{const t=pick([[3,4,5],[6,8,10],[5,12,13],[8,6,10]]);return{q:`جد مقياس العدد المركب: z = ${t[0]} + ${t[1]}i`,ans:t[2],l:1}},
- cprod:()=>{const a=R(2,5),b=R(1,4);return{q:`جد ناتج (${a} + ${b}i)(${a} − ${b}i)`,ans:a*a+b*b,l:1}},
+ cprod:()=>{const a=R(2,5),b=R(1,4);return{q:`جد ناتج (${a} + ${b===1?'':b}i)(${a} − ${b===1?'':b}i)`,ans:a*a+b*b,l:1}},
  parab:()=>{const p=R(1,6);return{q:`جد بعد البؤرة عن الرأس (p) للقطع المكافئ: y² = ${4*p}x`,ans:p,l:1}},
  deriv3:()=>{const a=R(1,3),c=R(2,6),x=R(1,3);return{q:`إذا كانت f(x) = ${a}x³ − ${c}x فجد f′(${x})`,ans:3*a*x*x-c,l:1}},
  integ:()=>{const a=R(1,4),c=R(1,5),u=R(1,3);return{q:`جد قيمة: ∫₀^${u} (${2*a}x + ${c}) dx`,ans:a*u*u+c*u,l:1}},
@@ -4679,7 +4679,7 @@ function mItem(it,i,en,R){
  if(it.k==='mcq'){a=`<span class="mo">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${(en?['a','b','c','d']:AL)[j]}${en?')':'-'}</i> ${o}</button>`).join('')}</span>`}
  else if(it.k==='tf'){const c=it.a?'t':'f';a=`<span class="mo tfo">( ${[['t',en?'True':'صح'],['f',en?'False':'خطأ']].map(o=>`<button class="opt ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}>${o[1]}</button>`).join(' / ')} )</span>`}
  else if(['def','why','fn','diff','irab','fix','tr'].includes(it.k))a=`<textarea class="hw" rows="2" data-id="${it.id}" ${dis}>${v||''}</textarea>`;
- else{const ltr=it.k==='dna'||en||it.l;a=`<input class="hw one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${it.k==='calc'?'inputmode="decimal"':''} ${dis}>`}
+ else{const ltr=it.k==='dna'||en||it.l;a=`<input class="hw one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${dis}>`}
  let fb='';
  if(R){const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0;
   fb=`<div class="red">${ok?'✓':half?'½':'✗'} <small>${toAr(+it.sc.toFixed(1))}/${toAr(+it.mk.toFixed(1))}</small>${!ok&&!['mcq','tf'].includes(it.k)?` — ${correctText(it)}`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)}</button></div>`}
@@ -4732,7 +4732,7 @@ function bookV(E,R,g){
     if(it.k==='mcq')inp=`<div class="bub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${(en?['a','b','c','d']:AL)[j]}</i><span>${o}</span></button>`).join('')}</div>`;
     else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="bub two">${[['t',en?'True':'صح'],['f',en?'False':'خطأ']].map(o=>`<button class="opt ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[0]==='t'?'✓':'✗'}</i><span>${o[1]}</span></button>`).join('')}</div>`}
     else if(['def','why','fn','diff','irab','fix','tr','loc'].includes(it.k))inp=`<textarea class="hw" rows="2" data-id="${it.id}" ${dis}>${v||''}</textarea>`;
-    else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="hw one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${it.k==='calc'?'inputmode="decimal"':''} ${dis}>`}
+    else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="hw one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${dis}>`}
     let fb='';
     if(R){const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0;
      fb=`<div class="red">${ok?'✓':half?'½':'✗'} <small>${toAr(+it.sc.toFixed(1))}/${toAr(+it.mk.toFixed(1))}</small>${it.self?' <small>(تصحيح ذاتي)</small>':''}${!ok&&!['mcq','tf'].includes(it.k)?` — ${correctText(it)}`:''}</div>${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}`}
@@ -4752,7 +4752,7 @@ function xItem(it,i,en,R){
  if(it.k==='mcq')a=`<div class="xo">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';a=`<div class="xo two">${[['t',en?'True':'صح','✓'],['f',en?'False':'خطأ','✗']].map(o=>`<button class="opt ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[2]}</i><span>${o[1]}</span></button>`).join('')}</div>`}
  else if(['def','why','fn','diff','irab','fix','tr','loc'].includes(it.k))a=`<textarea class="xa" rows="2" data-id="${it.id}" placeholder="${en?'Write your answer…':'اكتب إجابتك…'}" ${dis}>${v||''}</textarea>`;
- else{const ltr=it.k==='dna'||en||it.l;a=`<input class="xa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':it.k==='dna'?'AUG …':en?'Answer':'الإجابة'}" ${it.k==='calc'?'inputmode="decimal"':''} ${dis}>`}
+ else{const ltr=it.k==='dna'||en||it.l;a=`<input class="xa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':it.k==='dna'?'AUG …':en?'Answer':'الإجابة'}" ${dis}>`}
  let fb='';
  if(R){const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0,cls=ok?'ok':half?'half':'no';
   fb=`<div class="xfb ${cls}"><div class="r1"><b>${ok?'إجابة صحيحة':half?'إجابة جزئية':v?'إجابة خاطئة':'لم تُجب'}</b><span>${toAr(+it.sc.toFixed(1))} / ${toAr(+it.mk.toFixed(1))}${it.self?' · تصحيح ذاتي':''}${it.ai?' · صُحّح بالمعنى':''}</span></div>${!ok&&!['mcq','tf'].includes(it.k)?`<div class="ma"><small>الإجابة النموذجية</small>${correctText(it)}</div>`:''}${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)} إبلاغ</button></div>`}
@@ -5461,7 +5461,7 @@ function ansItem(E,it,i,R){
  if(it.k==='mcq')inp=`<div class="abub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="abub">${[['t',en?'T':'صح'],['f',en?'F':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[1]}</i></button>`).join('')}</div>`}
  else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa" rows="2" data-id="${it.id}" placeholder="${en?'Answer…':'الجواب…'}" ${dis}>${v||''}</textarea>`;
- else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="aa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':en?'Answer':'الجواب'}" ${it.k==='calc'?'inputmode="decimal"':''} ${dis}>`}
+ else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="aa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':en?'Answer':'الجواب'}" ${dis}>`}
  let fb='';
  if(R){const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0,cls=ok?'ok':half?'half':'no';
   fb=`<div class="xfb ${cls}"><div class="r1"><b>${ok?'صحيحة':half?'جزئية':v?'خاطئة':'لم تُجب'}</b><span>${toAr(+it.sc.toFixed(1))} / ${toAr(+it.mk.toFixed(1))}${it.self?' · تصحيح ذاتي':''}${it.ai?' · صُحّح بالمعنى':''}</span></div>${!ok?`<div class="ma"><small>الإجابة الصحيحة</small>${it.k==='mcq'?it.o[it.a]:it.k==='tf'?(it.a?'صح':'خطأ'):correctText(it)}</div>`:''}${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)} إبلاغ</button></div>`}
