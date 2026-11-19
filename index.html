@@ -613,10 +613,10 @@ textarea.xa{min-height:64px;line-height:1.7}
 .gotoans{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px auto 0;padding:12px 22px;border-radius:14px;background:var(--brand);color:#fff;font-family:var(--hd);font-weight:600;box-shadow:0 4px 0 var(--pri2)}
 .as{margin:18px auto 0;width:calc(100% - 16px);max-width:820px;position:relative}
 .ash{font-family:var(--hd);font-weight:700;font-size:18px;margin:14px 4px 6px}
-.pv{position:sticky;top:var(--ebh,120px);z-index:6;background:#fff;color:#000;border-radius:16px;box-shadow:0 10px 26px -12px rgba(0,0,0,.35);border:1.5px solid var(--brand);overflow:hidden}
+.pv{position:sticky;top:var(--ebh,120px);transform:translateY(var(--vvt,0px));will-change:transform;z-index:6;background:#fff;color:#000;border-radius:16px;box-shadow:0 10px 26px -12px rgba(0,0,0,.35);border:1.5px solid var(--brand);overflow:hidden}
 .pvh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--brand);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
 .pvh span{display:inline-flex;align-items:center;gap:6px}
-.pvb{max-height:32vh;overflow:auto;padding:6px 10px 10px;font-family:Amiri,serif}
+.pvb{max-height:min(32vh,calc(var(--vvh,100vh)*.26));overflow:auto;padding:6px 10px 10px;font-family:Amiri,serif}
 .pvb .pph,.pvb .pit,.pvb .pil{font-size:14.5px}
 .pvb .hl{background:#fff3b0;border-radius:4px;box-shadow:0 0 0 3px #fff3b0}
 .aq{background:var(--surface);border-radius:18px;padding:12px 14px;margin-top:12px;box-shadow:var(--sh);scroll-margin-top:calc(var(--ebh,120px) + 34vh + 20px)}
@@ -642,6 +642,13 @@ textarea.aa{min-height:58px;line-height:1.7}
 .abub .opt.wrong{background:var(--badSoft);border-color:var(--bad);color:var(--bad)}
 .dark .op,.dark .pv{background:#fdfdfb}
 .splash{min-height:100vh;display:grid;place-items:center}.splash i{width:34px;height:34px;border-radius:50%;border:3px solid #dfe2ee;border-top-color:#9aa0bd;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.skipb{display:block;width:100%;margin:6px 0 2px;padding:9px;border-radius:12px;border:1.5px dashed var(--line2);background:var(--surface2);color:var(--ink2);font-weight:600;font-size:13px;font-family:"IBM Plex Sans Arabic"}
+.skipb.on{border-style:solid;border-color:var(--warn);background:var(--warnSoft);color:#8a5a00}
+.aq.skd{opacity:.75}
+.skn{font-size:13px;color:var(--ink3);padding:6px 4px}
+.scr-exam .ebar,.ebar{transform:translateY(var(--vvt,0px))}
+.as input,.as textarea,.as select,.xs input,.xs textarea{font-size:16px!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </style>
 </head>
 <body>
@@ -3903,7 +3910,9 @@ const SEEN={k:(gk,sub)=>'sf_'+gk+'_'+sub,
  mem:{},
  get(gk,sub){try{const s=localStorage.getItem(this.k(gk,sub));if(s)return JSON.parse(s)}catch(e){}return this.mem[this.k(gk,sub)]||{}},
  put(gk,sub,list){try{const m=this.get(gk,sub),t=Date.now();list.forEach((s,i)=>m[s]=t+i);const ks=Object.keys(m).sort((a,b)=>m[b]-m[a]).slice(0,4000);const o={};ks.forEach(x=>o[x]=m[x]);this.mem[this.k(gk,sub)]=o;localStorage.setItem(this.k(gk,sub),JSON.stringify(o))}catch(e){}}};
-const sigOf=x=>x.gen?'g:'+x.gen+':'+Math.random():(x.fam||x.q||x.text||x.k);
+const stripWz=s=>String(s==null?'':s).replace(/\s*\((?:وزاري|وزارية)[^)]*\)/g,'').trim();
+const qKey=s=>nz(stripWz(s)).replace(/[^\u0621-\u064A0-9a-z ]/g,'').replace(/\s+/g,' ').trim();
+const sigOf=x=>x.gen?'g:'+x.gen+':'+Math.random():(qKey(x.fam||x.q||x.text)||x.k);
 function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map(x=>[m[sigOf(x)]||0,m['i:'+(x.q||x.text)]||0,x]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p[2])}
 function seenMark(gk,sub,items){SEEN.put(gk,sub,items.filter(x=>!x.gen).flatMap(x=>[sigOf(x),'i:'+(x.q||x.text)]))}
 const NUMW={1:'واحداً',2:'اثنين',3:'ثلاثاً',4:'أربعاً',5:'خمساً'};
@@ -3925,6 +3934,7 @@ function buildExam(gk,sub,type,unit){
    if(ext.length){const more=freshOrder(gk,sub,(poolFor(gk,sub,{ls:ext})||[]).filter(fl));pool=pool.concat(more)}}}
  else if(sub==='math'){pool=[];for(let i=0;i<40;i++)pool.push({k:'calc'})}
  else pool=shuffle(bankFor(sub,b).filter(x=>!(early||b==='p56')||['mcq','tf','blank','calc'].includes(x.k)));
+ {const wzK=new Set(pool.filter(x=>x.wz).map(x=>x.k+'|'+sigOf(x)));const sk=new Set();pool=pool.filter(x=>{if(x.gen)return true;const key=x.k+'|'+sigOf(x);if(!x.wz&&wzK.has(key))return false;if(sk.has(key))return false;sk.add(key);return true})}
  const byK={};pool.forEach(x=>(byK[x.k]=byK[x.k]||[]).push(x));
  const famLow=new Set(pool.map(x=>x.gen?Math.random():sigOf(x))).size<nQ*4;
  if(sub==='nahw'&&(byK.psg||byK.fix)){delete byK.def;delete byK.diff;delete byK.fn;delete byK.loc}
@@ -3944,11 +3954,11 @@ function buildExam(gk,sub,type,unit){
   if(!k)k=Object.keys(byK).find(x=>byK[x].length);
   if(!k)break;tk.add(k);
   rot[k]=(rot[k]||0)+1;
-  let want=sub==='math'?(early?4:3):({def:3,why:3,fn:3,loc:3,diff:2,irab:3,fix:2,tr:2,blank:4,mcq:4,tf:4,calc:2,dna:1,ext:3}[k]||3);
+  let want=sub==='math'?(early?4:3):({def:5,why:4,fn:4,loc:4,diff:3,irab:4,fix:3,tr:3,blank:5,mcq:5,tf:5,calc:3,dna:1,ext:4}[k]||3);
   if(k!=='psg'&&k!=='dna'&&sub!=='math')want=Math.max(EX.minI,Math.min(want,EX.maxI,Math.max(EX.minI,Math.round(avg*1.2)||EX.minI)));
   const raw=take(k,want);if(!raw.length){byK[k]=[];si--;continue}
   let choose=null;
-  if(EX.choose&&OPTK.includes(k)&&raw.length>=2&&byK[k].length>Math.max(3,slots-si)){const ex=take(k,1);if(ex.length){raw.push(ex[0]);choose=raw.length-1}}
+  if(EX.choose&&OPTK.includes(k)&&raw.length>=3)choose=raw.length-1;
   if(k==='calc'&&sub!=='math'&&raw.length<want)while(raw.length<2)raw.push({k:'calc'});
   raw.forEach(r=>used.push(r));
   if(k==='psg'){const P=makeItem(sub,b,raw[0]);parts.push({k,text:P.text,wz:P.wz,items:P.subs});continue}
@@ -3974,7 +3984,7 @@ let E_quizFlag=false;
 function scoreExam(E){
  E.qs.forEach(q=>{q.sc=0;q.parts.forEach(p=>{const s=p.items.map(it=>it.sc||0).sort((a,b)=>b-a);p.sc=(p.choose?s.slice(0,p.choose):s).reduce((a,c)=>a+c,0);q.sc+=p.sc})});
  let total;
- if(E.best){const s=E.qs.map((q,i)=>[q.sc,i]).sort((a,b)=>b[0]-a[0]);E.drop=s.slice(E.best).map(x=>x[1]);total=s.slice(0,E.best).reduce((t,x)=>t+x[0],0)}
+ if(E.best){const sk=E.skip||[];const s=E.qs.map((q,i)=>[q.sc,i]).filter(x=>!sk.includes(x[1])).sort((a,b)=>b[0]-a[0]);E.drop=s.slice(E.best).map(x=>x[1]).concat(sk);total=s.slice(0,E.best).reduce((t,x)=>t+x[0],0)}
  else{E.drop=[];total=E.qs.reduce((t,q)=>t+q.sc,0)}
  E.total=Math.round(Math.min(100,total));
 }
@@ -4527,7 +4537,7 @@ function render(){
  const a=$('#app');
  const f={ob:obV,home:homeV,subs:subsV,sub:subV,qb:qbV,eb:ebV,exam:examV,result:resultV,hist:histV,me:meV,admin:admV}[V.scr]||homeV;
  a.innerHTML=`<div class="scr">${f()}</div>`+(['home','subs','hist','me'].includes(V.scr)?navV():'');
- if(V.scr==='exam'){bindExam();if(!isEarly(V.exam))initPv()}
+ if(V.scr==='exam'){bindExam();if(!isEarly(V.exam))initPv()}else if(typeof lockZoom==='function'){lockZoom(false);document.documentElement.style.setProperty('--vvt','0px')}
  if(V.scr==='result')animRing();
 }
 
@@ -4653,8 +4663,8 @@ async function finish(){
 }
 function selfFix(id){const E=V.exam;const it=E.qs.flatMap(q=>q.parts.flatMap(p=>p.items)).find(x=>x.id===id);if(!it)return;
  it.sc=it.mk;it.self=1;scoreExam(E);if(U.hist[E.hi]){U.hist[E.hi].s=E.total;LS.set('hist',U.hist)}toast('تم التصحيح: '+toAr(E.total)+'/١٠٠');const y=scrollY;render();scrollTo(0,y)}
-function counts(){let a=0,n=0;V.exam.qs.forEach(q=>q.parts.forEach(p=>{const d=p.items.filter(it=>{const v=V.exam.ans[it.id];return v!==undefined&&String(v).trim()!==''}).length;const need=p.choose||p.items.length;n+=need;a+=Math.min(d,need)}));return[a,n]}
-function qDone(q){return q.parts.every(p=>{const d=p.items.filter(it=>{const v=V.exam.ans[it.id];return v!==undefined&&String(v).trim()!==''}).length;return d>=(p.choose||p.items.length)})}
+function counts(){let a=0,n=0;const sk=V.exam.skip||[];V.exam.qs.forEach((q,qi)=>{if(sk.includes(qi))return;q.parts.forEach(p=>{const d=p.items.filter(it=>{const v=V.exam.ans[it.id];return v!==undefined&&String(v).trim()!==''}).length;const need=p.choose||p.items.length;n+=need;a+=Math.min(d,need)})});return[a,n]}
+function qDone(q){if((V.exam.skip||[]).includes(V.exam.qs.indexOf(q)))return true;return q.parts.every(p=>{const d=p.items.filter(it=>{const v=V.exam.ans[it.id];return v!==undefined&&String(v).trim()!==''}).length;return d>=(p.choose||p.items.length)})}
 function jumpQ(i){const el=document.getElementById('qc'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})}
 function setTab(t,id){V.tab=t;render();if(id){const el=document.getElementById('ai_'+id);if(el){el.scrollIntoView({block:'center'});const f=el.querySelector('input,textarea');if(f&&!V.review)setTimeout(()=>f.focus(),150)}}else scrollTo(0,0)}
 
@@ -4789,12 +4799,12 @@ function sheetV(E,R,g,wiz,ul){
 const ADM_DEF={
  site:{notice:''},
  grades:{},subs:{},gsub:{},units:{},hideQ:[],papers:[],
- exam:{ai:false,m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},nP:2,minI:2,maxI:4,choose:true,
+ exam:{ai:false,m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},nP:2,minI:2,maxI:6,choose:true,
   h1:'جمهورية العراق',h2:'وزارة التربية',h3:'المديرية العامة للتقويم والامتحانات',wm:'نموذج تدريبي · منصة صفّي'}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function admMerge(c){c=c||{};const o=clone(ADM_DEF);for(const k in c){if(k==='exam')continue;o[k]=c[k]}
- o.exam=Object.assign(clone(ADM_DEF.exam),c.exam||{});['m','h','f','fn'].forEach(t=>o.exam[t]=Object.assign({},ADM_DEF.exam[t],(c.exam||{})[t]||{}));return o}
+ o.exam=Object.assign(clone(ADM_DEF.exam),c.exam||{});if(o.exam.maxI===4&&!o.exam.maxISet)o.exam.maxI=6;['m','h','f','fn'].forEach(t=>o.exam[t]=Object.assign({},ADM_DEF.exam[t],(c.exam||{})[t]||{}));return o}
 var ADM={cfg:clone(ADM_DEF),qs:[],user:null,isAdmin:false,loaded:false};
 
 const qToRow=q=>({grades:q.grades,subject:q.sub,unit:q.unit,lesson:q.les||null,kind:q.k,wz:!!q.wz,active:true,
@@ -5159,7 +5169,7 @@ function adExam(){const X=ADM.cfg.exam,num=(path,v,mn,mx)=>`<input class="inp nu
  ${[['h1','السطر الأول'],['h2','السطر الثاني'],['h3','الجهة (يسار)'],['wm','العلامة أسفل الورقة']].map(k=>`<label class="adl">${k[1]}</label><input class="inp" value="${esc(X[k[0]])}" onchange="admSetX('${k[0]}',this.value)">`).join('')}</div>
  <div class="cfg"><div class="cfgh"><b>إعلان للطلاب</b></div><textarea class="inp" rows="2" placeholder="يظهر بالصفحة الرئيسية (اتركه فارغاً لإخفائه)" onchange="ADM.cfg.site.notice=this.value;admSave()">${esc(ADM.cfg.site.notice||'')}</textarea></div>
  <button class="btns" onclick="if(confirm('ترجع إعدادات الامتحان للأصل؟')){ADM.cfg.exam=clone(ADM_DEF.exam);admSave()}">إرجاع الإعدادات الأصلية</button>`}
-function admSetX(path,v){const p=path.split('.');let o=ADM.cfg.exam;while(p.length>1)o=o[p.shift()];o[p[0]]=v;if(ADM.cfg.exam.minI>ADM.cfg.exam.maxI)ADM.cfg.exam.maxI=ADM.cfg.exam.minI;admSave()}
+function admSetX(path,v){if(path==='maxI')ADM.cfg.exam.maxISet=true;const p=path.split('.');let o=ADM.cfg.exam;while(p.length>1)o=o[p.shift()];o[p[0]]=v;if(ADM.cfg.exam.minI>ADM.cfg.exam.maxI)ADM.cfg.exam.maxI=ADM.cfg.exam.minI;admSave()}
 
 /* ----- النتائج والبلاغات ----- */
 function adResults(){
@@ -5435,10 +5445,10 @@ function pqHTML(E,q,qi){
   const lbl=one?'':`<b>${AL[pi]})</b> `;
   h+=`<div class="pp"><div class="pph"><span class="pmk">(${toAr(Math.round(p.marks))} ${p.marks>10?'درجة':'درجات'})</span>${lead}${lbl}<b>${offHead(p,en)}</b></div>`;
   if(p.k==='psg')h+=`<div class="ppsg">${ulz(p.text)}</div>`;
-  if(INL.includes(p.k)&&!en)h+=`<div class="pil">${p.items.map((it,i)=>`<span id="pi_${it.id}">${toAr(i+1)}) ${ulz(it.q)}</span>`).join('، ')}</div>`;
+  if(INL.includes(p.k)&&!en)h+=`<div class="pil">${p.items.map((it,i)=>`<span id="pi_${it.id}">${toAr(i+1)}) ${ulz(stripWz(it.q))}</span>`).join('، ')}</div>`;
   else h+=p.items.map((it,i)=>{
    let x='';if(it.k==='mcq')x=`<div class="pmo">${it.o.map((o,j)=>`<span>${(en?['a','b','c','d']:AL)[j]}) ${o}</span>`).join('')}</div>`;
-   return `<div class="pit" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'-'}</span><div>${ulz(it.q||'')}${it.k==='tf'?' <span class="tfm">(&nbsp;&nbsp;&nbsp;)</span>':''}${x}</div></div>`}).join('');
+   return `<div class="pit" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'-'}</span><div>${ulz(stripWz(it.q))}${it.k==='tf'?' <span class="tfm">(&nbsp;&nbsp;&nbsp;)</span>':''}${x}</div></div>`}).join('');
   h+=`</div>`;
  });
  return h+`</div>`;
@@ -5464,7 +5474,10 @@ function offV(E,R,g,wiz,ul){
  <div class="ash">ورقة الإجابة</div>`;
  E.qs.forEach((q,qi)=>{
   const qm=toAr(Math.round(q.marks));
-  h+=`<section class="aq" id="qc${qi}" data-q="${qi}"><div class="aqh"><b>جواب ${E.quiz?'س'+toAr(qi+1):QN[qi]}/</b>${R?`<span class="red" style="color:${scoreCol(q.sc/q.marks*100)}">${toAr(+q.sc.toFixed(1))}/${qm}${E.drop&&E.drop.includes(qi)?' · غير محتسب':''}</span>`:`<span>${qm} درجة</span>`}</div>`;
+  const skd=(E.skip||[]).includes(qi);
+  h+=`<section class="aq ${skd?'skd':''}" id="qc${qi}" data-q="${qi}"><div class="aqh"><b>جواب ${E.quiz?'س'+toAr(qi+1):QN[qi]}/</b>${R?`<span class="red" style="color:${scoreCol(q.sc/q.marks*100)}">${skd?'متروك':`${toAr(+q.sc.toFixed(1))}/${qm}${E.drop&&E.drop.includes(qi)?' · غير محتسب':''}`}</span>`:`<span>${qm} درجة</span>`}</div>
+  ${E.best&&!R?`<button class="skipb ${skd?'on':''}" onclick="toggleSkip(${qi})">${skd?'✓ تركت هذا السؤال — اضغط للتراجع':'اترك هذا السؤال'}</button>`:''}`;
+  if(skd&&!R){h+=`<div class="skn">هذا السؤال متروك ولا يُحتسب. تجاوب على ${toAr(E.best)} أسئلة فقط.</div></section>`;return}
   q.parts.forEach((p,pi)=>{
    h+=`<div class="ap">${q.parts.length>1?`<div class="aph"><b>${AL[pi]})</b>${p.choose?`<span class="ch">أجب عن ${NUMW2[p.choose]} فقط</span>`:''}</div>`:p.choose?`<div class="aph"><span class="ch">أجب عن ${NUMW2[p.choose]} فقط</span></div>`:''}`;
    p.items.forEach((it,i)=>{h+=ansItem(E,it,i,R)});
@@ -5476,7 +5489,7 @@ function offV(E,R,g,wiz,ul){
 function ansItem(E,it,i,R){
  const en=E.en,v=E.ans[it.id],dis=R?'disabled':'';let inp='';
  const L=en?['a','b','c','d']:AL;
- const lab=it.k==='mcq'||it.k==='tf'?'':`<div class="alab">${ulz(String(it.q||'').length>70?String(it.q).slice(0,70)+'…':it.q||'')}</div>`;
+ const qq=stripWz(it.q);const lab=it.k==='mcq'||it.k==='tf'?'':`<div class="alab">${ulz(qq.length>70?qq.slice(0,70)+'…':qq)}</div>`;
  if(it.k==='mcq')inp=`<div class="abub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="abub">${[['t',en?'T':'صح'],['f',en?'F':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[1]}</i></button>`).join('')}</div>`}
  else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa" rows="2" data-id="${it.id}" placeholder="${en?'Answer…':'الجواب…'}" ${dis}>${v||''}</textarea>`;
@@ -5490,12 +5503,26 @@ function ansItem(E,it,i,R){
 let PVQ=-1,PVOFF=false;
 function togglePv(){PVOFF=!PVOFF;const b=$('#pvb'),x=$('#pvx');if(b)b.style.display=PVOFF?'none':'';if(x)x.textContent=PVOFF?'إظهار ▾':'إخفاء ▴'}
 function pvSet(qi){if(qi===PVQ)return;PVQ=qi;const src=document.getElementById('pq'+qi),b=$('#pvb'),t=$('#pvt');if(!src||!b)return;b.innerHTML=src.innerHTML.replace(/id="pi_/g,'data-pi="');if(t)t.textContent=V.exam.quiz?'س'+toAr(qi+1):QN[qi];b.scrollTop=0}
-function pvFocus(id){const sec=document.querySelector(`.ai[data-id="${id}"]`);if(!sec)return;const q=sec.closest('.aq');if(q)pvSet(+q.dataset.q);
+function pvFocus(id){const sec=document.querySelector(`.ai[data-id="${id}"]`);if(!sec)return;setTimeout(()=>pvClear(sec),350);const q=sec.closest('.aq');if(q)pvSet(+q.dataset.q);
  const b=$('#pvb');if(!b)return;b.querySelectorAll('.hl').forEach(x=>x.classList.remove('hl'));const t=b.querySelector(`[data-pi="${id}"]`);if(t){t.classList.add('hl');const top=t.offsetTop-b.offsetTop-8;b.scrollTo({top,behavior:'smooth'})}}
 function pvScroll(){if(V.scr!=='exam'||!$('#asheet'))return;const eb=document.querySelector('.ebar'),pv=$('#pv');const line=(eb?eb.getBoundingClientRect().bottom:0)+(pv?pv.offsetHeight:0)+20;
  let cur=0;document.querySelectorAll('.aq').forEach(s=>{if(s.getBoundingClientRect().top<=line)cur=+s.dataset.q});pvSet(cur)}
-function initPv(){PVQ=-1;const eb=document.querySelector('.ebar');if(eb)document.documentElement.style.setProperty('--ebh',eb.offsetHeight+'px');pvSet(0);if(PVOFF){PVOFF=false;togglePv()}}
+function initPv(){PVQ=-1;lockZoom(true);vvFix();const eb=document.querySelector('.ebar');if(eb)document.documentElement.style.setProperty('--ebh',eb.offsetHeight+'px');pvSet(0);if(PVOFF){PVOFF=false;togglePv()}}
 window.addEventListener('scroll',()=>{if(V.scr==='exam')requestAnimationFrame(pvScroll)},{passive:true});
+/* ثبات المعاينة مع الكيبورد والتكبير */
+function vvFix(){const vv=window.visualViewport,r=document.documentElement;if(!vv)return;
+ const ex=V.scr==='exam';const ot=ex?Math.max(0,vv.offsetTop):0;r.style.setProperty('--vvt',ot+'px');r.style.setProperty('--vvh',vv.height+'px');
+ const eb=document.querySelector('.ebar');if(eb&&ex)r.style.setProperty('--ebh',eb.offsetHeight+'px');
+ if(ex)requestAnimationFrame(pvScroll)}
+if(window.visualViewport){visualViewport.addEventListener('resize',vvFix);visualViewport.addEventListener('scroll',vvFix)}
+function pvClear(sec){const pv=$('#pv');if(!pv||!sec)return;const a=document.activeElement;const el=(a&&sec.contains(a))?a:sec;const r=el.getBoundingClientRect(),pb=pv.getBoundingClientRect().bottom;const vv=window.visualViewport;const vb=vv?vv.offsetTop+vv.height:innerHeight;
+ if(r.top<pb+8)scrollBy({top:r.top-pb-12,behavior:'smooth'});else if(r.bottom>vb-8)scrollBy({top:r.bottom-vb+16,behavior:'smooth'})}
+function lockZoom(on){const m=document.querySelector('meta[name=viewport]');if(!m)return;m.setAttribute('content','width=device-width, initial-scale=1, viewport-fit=cover'+(on?', maximum-scale=1':''))}
+
+function toggleSkip(qi){const E=V.exam;E.skip=E.skip||[];const max=E.qs.length-E.best;
+ if(E.skip.includes(qi))E.skip=E.skip.filter(x=>x!==qi);
+ else{if(E.skip.length>=max){if(max===1)E.skip=[qi];else return toast(`تگدر تترك ${toAr(max)} أسئلة بس`)}else E.skip.push(qi)}
+ const y=scrollY;render();scrollTo(0,y)}
 /* ---------- تشغيل ---------- */
 function bootRoute(){if(location.hash==='#admin'){V.scr='admin'}}
 window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin')});
