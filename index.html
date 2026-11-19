@@ -4955,6 +4955,9 @@ function adQs(){
  <select class="inp sel" onchange="V.ad.f.src=this.value;V.ad.f.pg=0;render()">${[['','كل المصادر'],['book','من المنهج'],['adm','أضفتها أنا'],['wz','وزاري']].map(o=>`<option value="${o[0]}" ${F.src===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>
  <div class="adpick"><input class="inp" placeholder="ابحث بنص السؤال أو الجواب…" value="${esc(F.q)}" onchange="V.ad.f.q=this.value;V.ad.f.pg=0;render()"><button class="btnp" style="width:auto;padding:10px 16px" onclick="admNew()">${I('edit',16)} سؤال جديد</button></div>
  <div class="adbar"><span>${toAr(rows.length)} سؤال</span>${hidden.length?`<button class="chip" onclick="admHiddenSheet()">${toAr(hidden.length)} مخفي — استرجاع</button>`:''}</div>
+ ${(()=>{const ids=[...new Set(rows.filter(r=>r.x.adm).map(r=>r.x.adm))];V.ad.bulk=ids;return ids.length?`<div class="cfg adbulk"><div class="cfgh"><b>${toAr(ids.length)} سؤال مضاف بهذا الفلتر</b></div><p class="muted2">إذا ضفت أسئلة بالغلط لمادة ثانية، انقلها كلها للمادة الصحيحة أو احذفها مرة وحدة. (تقدر تحدد فصل معين من الفلتر فوق)</p>
+ <div class="adpick" style="padding:0"><select class="inp sel" id="bmv">${Object.keys(SUB).filter(s=>s!==V.ad.s&&allGrades().some(g=>GR[g].subs.includes(s))).map(s=>`<option value="${s}">${SUB[s].n}</option>`).join('')}</select><button class="btnp" style="width:auto;padding:10px 14px" onclick="admBulkMove($('#bmv').value)">نقل إليها</button></div>
+ <button class="btns" style="margin-top:8px;color:var(--bad)" onclick="admBulkDel()">${I('trash',16)} حذف كل هذه الأسئلة (${toAr(ids.length)})</button></div>`:''})()}
  <div class="adlist">${pg.map(r=>{const x=r.x,id=x.adm?`'${x.adm}'`:null;return `<div class="adq"><div class="adqh"><span class="kb">${KNAME[x.k]||x.k}</span>${x.adm?'<span class="kb a">مضاف</span>':''}${x.wz?'<span class="kb w">وزاري</span>':''}<small>${esc(r.u)}${r.l!==r.u?' › '+esc(r.l):''}</small></div>
   <div class="adqt">${esc(x.q||x.text||'')}</div><div class="adqa">${esc(adAnsText(x))}</div>
   <div class="adqb">${x.adm?`<button onclick="admEdit(${id})">${I('edit',14)} تعديل</button><button class="d" onclick="admDel(${id})">${I('trash',14)} حذف</button>`:`<button onclick="admCopyEdit(${adRef(x)})">${I('edit',14)} تعديل</button><button class="d" onclick="admHide(${adRef(x)})">${I('x',14)} إخفاء</button>`}</div></div>`}).join('')||'<div class="empty">ماكو أسئلة بهذا الفلتر</div>'}</div>
@@ -5249,6 +5252,14 @@ async function admPdf(files){
  }catch(e){pdfSt({busy:0,msg:'خطأ: '+(e.message||e),err:1})}
  const fi=document.getElementById('pdff');if(fi)fi.value='';
 }
+
+/* ---------- حذف ونقل جماعي ---------- */
+async function admBulkDel(){const ids=V.ad.bulk||[];if(!ids.length)return;if(!confirm(`تحذف ${ids.length} سؤال نهائياً؟`))return;
+ try{for(let i=0;i<ids.length;i+=200)await AST.delQ(ids.slice(i,i+200));admRebuild();V.ad.f.u='';V.ad.f.l='';toast('انحذفت '+toAr(ids.length)+' سؤال ✓')}catch(e){toast('خطأ: '+(e.message||e))}render()}
+async function admBulkMove(sub){const ids=V.ad.bulk||[];if(!ids.length||!sub)return;if(!confirm(`تنقل ${ids.length} سؤال إلى «${SUB[sub].n}»؟`))return;
+ try{if(SB){for(let i=0;i<ids.length;i+=200){const {error}=await SB.from('questions').update({subject:sub}).in('id',ids.slice(i,i+200));if(error)throw error}}
+  ADM.qs.forEach(q=>{if(ids.includes(q.id)){q.sub=sub;q.grades=q.grades.filter(g=>GR[g].subs.includes(sub));if(!q.grades.length)q.grades=[V.ad.g]}});
+  if(!SB)AST.saveLocal();admRebuild();V.ad.f.u='';V.ad.f.l='';toast('انتقلت '+toAr(ids.length)+' سؤال إلى '+SUB[sub].n+' ✓')}catch(e){toast('خطأ: '+(e.message||e))}render()}
 
 /* =====================================================================
    تحكم كامل بالواجهة: الشعار، الألوان، النصوص، ترتيب الخانات، الميزات
