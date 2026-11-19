@@ -641,6 +641,7 @@ textarea.aa{min-height:58px;line-height:1.7}
 .abub .opt.right{background:var(--okSoft);border-color:var(--ok);color:var(--ok)}
 .abub .opt.wrong{background:var(--badSoft);border-color:var(--bad);color:var(--bad)}
 .dark .op,.dark .pv{background:#fdfdfb}
+.splash{min-height:100vh;display:grid;place-items:center}.splash i{width:34px;height:34px;border-radius:50%;border:3px solid #dfe2ee;border-top-color:#9aa0bd;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -5481,8 +5482,21 @@ function bootRoute(){if(location.hash==='#admin'){V.scr='admin'}}
 window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin')});
 (async function boot(){
  if(!SB){const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}ADM.loaded=true}
+ else{
+  // آخر نسخة محفوظة بالجهاز تطلع فوراً، وللزائر الجديد نعرض شاشة تحميل لحد ما توصل الهوية الصحيحة
+  const c=LS.get('cache',null);
+  if(c&&c.cfg){ADM.cfg=admMerge(c.cfg);ADM.qs=c.qs||[]}
+  else{const a=document.getElementById('app');if(a)a.innerHTML='<div class="splash"><i></i></div>';
+   await Promise.race([AST.load(),new Promise(r=>setTimeout(r,4000))])}
+ }
  buildCUR();applyTheme();bootRoute();render();
- if(SB){await Promise.all([AST.load(),admSession()]);buildCUR();applyTheme();render()}
+ if(SB){
+  const before=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
+  await Promise.all([AST.load(),admSession()]);
+  try{localStorage.setItem('saffi_cache',JSON.stringify({cfg:ADM.cfg,qs:ADM.qs}))}catch(e){try{localStorage.setItem('saffi_cache',JSON.stringify({cfg:ADM.cfg,qs:[]}))}catch(e2){}}
+  const after=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
+  if(before!==after||V.scr==='admin'){buildCUR();applyTheme();if(V.scr!=='exam')render()}
+ }
 })();
 
 /* ---------- تصحيح بالمعنى عبر الذكاء الاصطناعي (اختياري) ---------- */
