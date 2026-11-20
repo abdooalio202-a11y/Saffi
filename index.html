@@ -5009,7 +5009,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'}</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٠/١١ (٣)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5661,6 +5661,14 @@ const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const
  async set(k,v){try{const d=await this.open();await new Promise(res=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=res;t.onabort=res})}catch(e){}}};
 function bootRoute(){if(location.hash==='#admin'){V.scr='admin'}}
 window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin')});
+
+/* اختيار الفصول ينحفظ بالأسماء: إذا تغيّر ترتيب الفصول بعد ما توصل الأسئلة من السيرفر، يبقى الاختيار على نفس الفصل */
+(function(){const _bc=buildCUR;
+ const toNames=(gk,sub,ls)=>{const us=unitsFor(gk,sub)||[];return (ls||[]).map(k=>{const[a,b]=String(k).split('-').map(Number);const u=us[a],l=u&&u.ls[b];return u&&l?[u.n,l.n]:null}).filter(Boolean)};
+ const toKeys=(gk,sub,nm)=>{const us=unitsFor(gk,sub)||[];const out=[];nm.forEach(([un,ln])=>{const i=us.findIndex(u=>u.n===un);if(i<0)return;let j=us[i].ls.findIndex(l=>l.n===ln);if(j<0&&us[i].ls.length===1)j=0;if(j>=0)out.push(i+'-'+j)});return [...new Set(out)]};
+ buildCUR=function(){const snap=[];try{if(typeof U!=='undefined'&&U.grade&&V.sub)['eb','qb'].forEach(t=>{if(V[t]&&V[t].ls){const st=stats(U.grade,V.sub);snap.push([t,toNames(U.grade,V.sub,V[t].ls),V[t].ls.length===allKeys(st).length])}})}catch(e){}
+  _bc.apply(this,arguments);
+  try{snap.forEach(([t,nm,all])=>{if(!V[t])return;V[t].ls=all?allKeys(stats(U.grade,V.sub)):toKeys(U.grade,V.sub,nm)})}catch(e){}}})();
 (async function boot(){
  if(!SB){const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}ADM.loaded=true}
  else{
@@ -5668,7 +5676,7 @@ window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin'
   SEEN.free();let c=null;try{c=await IDB.get('cache')}catch(e){}
   if(c&&c.cfg){ADM.cfg=admMerge(c.cfg);ADM.qs=c.qs||[]}
   else{const a=document.getElementById('app');if(a)a.innerHTML='<div class="splash"><i></i></div>';
-   await Promise.race([AST.load(),new Promise(r=>setTimeout(r,4000))])}
+   await Promise.race([AST.load(),new Promise(r=>setTimeout(r,12000))])}
  }
  buildCUR();applyTheme();bootRoute();render();
  if(SB){
