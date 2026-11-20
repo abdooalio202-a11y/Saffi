@@ -4024,6 +4024,28 @@ function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map
 function seenMark(gk,sub,items){SEEN.put(gk,sub,items.filter(x=>!x.gen).flatMap(x=>[sigOf(x),'i:'+(x.q||x.text)]))}
 const NUMW={1:'واحداً',2:'اثنين',3:'ثلاثاً',4:'أربعاً',5:'خمساً'};
 const OPTK=['def','why','fn','diff','irab','fix','tr','loc'];
+
+/* الصفوف الأولية (الأول والثاني والثالث): الطالب ما يكتب جواب نصي — نحوّل الفراغ والأسئلة المكتوبة لاختيارات */
+const EARLYK=['p1','p2','p3'];
+function earlyMCQ(gk,parts,pool){
+ if(!EARLYK.includes(gk))return;
+ const nn=s=>String(s==null?'':s).replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/[.،,:؛]/g,'').replace(/\s+/g,' ').trim();
+ const ans=x=>x.k==='blank'||x.k==='ext'?(Array.isArray(x.a)?(Array.isArray(x.a[0])?x.a[0][0]:x.a[0]):x.a):x.m;
+ const bank=[];const seen=new Set();
+ (pool||[]).concat(parts.flatMap(p=>p.items||[])).forEach(x=>{const v=[];if(x.k==='mcq'&&x.o)v.push(...x.o);else{const a=ans(x);if(a)v.push(a)}
+  v.forEach(s=>{s=String(s).trim();const k=nn(s);if(s&&k&&!seen.has(k)&&!/^\d+$/.test(k)){seen.add(k);bank.push(s)}})});
+ const wc=s=>String(s).trim().split(/\s+/).length;
+ const pick=(cor,q)=>{const ck=nn(cor),cw=wc(cor),qk=nn(q);
+  const c=shuffle(bank.filter(s=>{const k=nn(s);return k!==ck&&!ck.includes(k)&&!k.includes(ck)&&!qk.includes(k)}));
+  c.sort((a,b)=>Math.abs(wc(a)-cw)-Math.abs(wc(b)-cw));return c.slice(0,6).sort(()=>Math.random()-.5).slice(0,cw>4?2:3)};
+ const TXT=['blank','ext','def','why','fn','loc','tr','diff','fix'];
+ parts.forEach(p=>{if(!p.items)return;let conv=0;
+  p.items=p.items.map(it=>{if(!TXT.includes(it.k))return it;const cor=ans(it);if(!cor)return it;const ds=pick(cor,it.q);if(ds.length<2)return it;
+   const o=shuffle([String(cor).trim()].concat(ds));conv++;
+   let q=it.q;if(it.k==='def')q=`المقصود بـ«${stripWz(it.q)}» هو:`;else if(it.k==='why')q=`${stripWz(it.q)} — السبب:`;
+   return Object.assign({},it,{k:'mcq',q,o,a:o.indexOf(String(cor).trim()),m:undefined,wb:it.k==='blank'||it.k==='ext'})});
+  if(conv&&p.items.every(it=>it.k==='mcq')){p.wb=p.k==='blank'||p.k==='ext';p.k='mcq';p.choose=null}});
+}
 function buildExam(gk,sub,type,unit){
  const g=GR[gk],b=g.b,en=sub==='english';
  const early=b==='p12'||b==='p34';
@@ -4074,6 +4096,7 @@ function buildExam(gk,sub,type,unit){
   if(k==='psg'){const P=makeItem(sub,b,raw[0]);parts.push({k,text:P.text,wz:P.wz,items:P.subs});continue}
   parts.push({k,choose,items:raw.map(r=>makeItem(sub,b,r))});
  }
+ earlyMCQ(gk,parts,pool);
  // موضوع واحد؟ نقسّم الفروع حتى يطلع العدد الكامل من الأسئلة
  while(parts.length<nQ*2){const i=parts.findIndex(p=>p.k!=='psg'&&p.items.length>=4);if(i<0)break;const p=parts[i];const half=Math.ceil(p.items.length/2);const np={k:p.k,choose:null,items:p.items.splice(half)};p.choose=null;parts.splice(i+1,0,np)}
  const qn=Math.min(nQ,Math.max(1,Math.floor(parts.length/nP))),qs=[];
@@ -4099,6 +4122,7 @@ function scoreExam(E){
  E.total=Math.round(Math.min(100,total));
 }
 function partHead(p,en){
+ if(p.wb)return 'اختر الكلمة المناسبة للفراغ:';
  if(en&&KHE[p.k])return KHE[p.k];
  const n=p.choose;if(!n)return KH[p.k];
  const N=NUMW[n]||toAr(n);
@@ -4718,7 +4742,7 @@ function startQuiz(){
  if(q.order!=='rand')p.sort((a,b)=>idx.get(a)-idx.get(b));
  const mk=100/n;
  seenMark(U.grade,V.sub,p);
- const qs=p.map((r,i)=>{if(r.k==='psg'){const P=makeItem(V.sub,g.b,r);P.subs.forEach((s,j)=>{s.mk=mk/P.subs.length;s.id='z'+i+'s'+j});return{marks:mk,parts:[{k:'psg',text:P.text,marks:mk,items:P.subs}]}}const it=makeItem(V.sub,g.b,r);it.mk=mk;it.id='z'+i;return{marks:mk,parts:[{k:it.k,marks:mk,items:[it]}]}});
+ const qs=p.map((r,i)=>{if(r.k==='psg'){const P=makeItem(V.sub,g.b,r);P.subs.forEach((s,j)=>{s.mk=mk/P.subs.length;s.id='z'+i+'s'+j});return{marks:mk,parts:[{k:'psg',text:P.text,marks:mk,items:P.subs}]}}const it=makeItem(V.sub,g.b,r);it.mk=mk;it.id='z'+i;const pt={k:it.k,marks:mk,items:[it]};earlyMCQ(U.grade,[pt],p);pt.items.forEach(x=>{x.mk=mk;x.id='z'+i});return{marks:mk,parts:[pt]}});
  E_quizFlag=false;V.exam={quiz:true,g,sub:V.sub,type:'q',qs,best:null,en:V.sub==='english',ans:{},unit:q.all?-1:{ls:q.ls}};
  V.review=false;V.t0=Date.now();V.left=null;clearInterval(V.timer);go('exam');
 }
@@ -5547,6 +5571,7 @@ const isEarly=E=>EARLY.includes(E.g.k);
 const NUMW2={1:'واحداً',2:'اثنين',3:'ثلاثة',4:'أربعة',5:'خمسة',6:'ستة'};
 const INL=['def','fn','loc'];
 function offHead(p,en){
+ if(p.wb)return 'اختر الكلمة المناسبة للفراغ:';
  if(en&&KHE[p.k])return KHE[p.k];
  const n=p.choose,N=n?`(${NUMW2[n]||toAr(n)})`:'';
  if(!n)return KH[p.k];
