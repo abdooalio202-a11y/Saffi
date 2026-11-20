@@ -748,6 +748,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .lownote{display:flex;gap:8px;align-items:flex-start;background:var(--warnSoft);color:#8a5a00;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.7;margin:0 0 12px}.lownote svg{flex:0 0 auto;margin-top:3px}
 .shp{margin:6px 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px -10px rgba(0,0,0,.35);background:#fff;min-height:120px;display:grid;place-items:center}.shp img{display:block;width:100%;max-height:58vh;object-fit:contain}
 .shareb{background:linear-gradient(135deg,#f59e0b,#ef4444)!important;box-shadow:0 4px 0 #b45309!important}
+.fullbtn{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:20px;background:linear-gradient(135deg,#0ea5a4,#2563eb);color:#fff;box-shadow:0 10px 24px -12px rgba(37,99,235,.6)}
+.fullbtn .sq{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);display:grid;place-items:center;flex:0 0 auto}
+.fullbtn b{display:block;font-size:16px}.fullbtn small{display:block;font-size:12.5px;opacity:.9;margin-top:2px}
+.fullbtn .play{margin-inline-start:auto;width:38px;height:38px;border-radius:50%;background:#fff;color:#2563eb;display:grid;place-items:center}
+.exbox{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px}.exbox>b{display:block;margin-bottom:4px;font-size:14.5px}
+.inp.num.own{border-color:var(--brand);background:var(--brandSoft)}
 </style>
 </head>
 <body>
@@ -4025,6 +4031,10 @@ function seenMark(gk,sub,items){SEEN.put(gk,sub,items.filter(x=>!x.gen).flatMap(
 const NUMW={1:'واحداً',2:'اثنين',3:'ثلاثاً',4:'أربعاً',5:'خمساً'};
 const OPTK=['def','why','fn','diff','irab','fix','tr','loc'];
 
+/* إعدادات شكل الامتحان: الأساس ثم إعداد الصف إذا موجود */
+function exRaw(gk,k){const X=(typeof ADM!=='undefined'&&ADM.cfg&&ADM.cfg.exam)||{};const D={m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},c:{nQ:6,nP:3,dur:120}};
+ const o=Object.assign({nP:X.nP||2,minI:X.minI||2,maxI:X.maxI||6},D[k]||{},X[k]||{},((X.byG||{})[gk]||{})[k]||{});if(o.minI>o.maxI)o.maxI=o.minI;return o}
+function exCfg(gk,type){const g=GR[gk];const k=type==='f'?((g&&g.wiz&&g.b!=='p56')?'f':'fn'):type;return Object.assign({key:k},exRaw(gk,k))}
 /* الصفوف الأولية (الأول والثاني والثالث): الطالب ما يكتب جواب نصي — نحوّل الفراغ والأسئلة المكتوبة لاختيارات */
 const EARLYK=['p1','p2','p3'];
 function earlyMCQ(gk,parts,pool){
@@ -4050,13 +4060,13 @@ function buildExam(gk,sub,type,unit){
  const g=GR[gk],b=g.b,en=sub==='english';
  const early=b==='p12'||b==='p34';
  const EX=(typeof ADM!=='undefined'&&ADM.cfg&&ADM.cfg.exam)||{m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},nP:2,minI:2,maxI:4,choose:true};
- let nQ=type==='m'?EX.m.nQ:type==='h'?EX.h.nQ:EX.fn.nQ, best=null;
- if(type==='f'&&g.wiz&&b!=='p56'){nQ=EX.f.nQ;best=Math.min(EX.f.best,nQ)}
+ const C=exCfg(gk,type);let nQ=C.nQ, best=C.key==='f'?Math.min(C.best||nQ,nQ):null;
  const qMarks=best?20:100/nQ;
  const fl=x=>early?['mcq','tf','blank','calc'].includes(x.k):b==='p56'?['mcq','tf','blank','calc','irab','why','def','psg','fix','tr'].includes(x.k):true;
  const cp=poolFor(gk,sub,unit==null?-1:unit);
  let pool;
- if(cp){pool=freshOrder(gk,sub,cp.filter(fl));
+ if(cp&&type==='c'){const us=unitsFor(gk,sub)||[];const L=us.map((_,i)=>freshOrder(gk,sub,(poolFor(gk,sub,i)||[]).filter(fl)));pool=[];for(let j=0;L.some(l=>j<l.length);j++)L.forEach(l=>{if(j<l.length)pool.push(l[j])})}
+ else if(cp){pool=freshOrder(gk,sub,cp.filter(fl));
   // موضوع واحد أو مواضيع قليلة الأسئلة: نكمّل من باقي مواضيع نفس الفصل حتى تكتمل الورقة
   if(unit&&unit.ls&&new Set(pool.map(x=>sigOf(x))).size<nQ*5){const us=unitsFor(gk,sub)||[],sel=new Set(unit.ls),ui=[...new Set(unit.ls.map(k=>+k.split('-')[0]))];
    const ext=[];ui.forEach(i=>(us[i]||{ls:[]}).ls.forEach((_,j)=>{if(!sel.has(i+'-'+j))ext.push(i+'-'+j)}));
@@ -4067,13 +4077,13 @@ function buildExam(gk,sub,type,unit){
  const byK={};pool.forEach(x=>(byK[x.k]=byK[x.k]||[]).push(x));
  const famLow=new Set(pool.map(x=>x.gen?Math.random():sigOf(x))).size<nQ*4;
  if(sub==='nahw'&&(byK.psg||byK.fix)){delete byK.def;delete byK.diff;delete byK.fn;delete byK.loc}
- const nP=EX.nP||2;
+ const nP=C.nP||2;
  const SL=sub==='nahw'?[['psg','irab','fix','tr'],['why','blank','mcq','tf','tr','fix','irab']]
   :sub==='math'?[['calc'],['calc','mcq','blank','tf']]
   :[['def','why','psg','dna','fn','diff','loc','tr','fix','irab','calc'],['blank','mcq','tf','calc','fn','loc','why']];
  const total=Object.values(byK).reduce((s,a)=>s+a.length,0),slots=nQ*nP;
  // أسئلة قليلة؟ نصغّر عدد الفقرات حتى الامتحان الجاي يطلع بأسئلة غير هاي
- const famN=new Set(pool.map(x=>x.gen?Math.random():sigOf(x))).size,capI=famN<slots*EX.maxI*2?Math.max(2,Math.floor(famN/(slots*2))):0;
+ const famN=new Set(pool.map(x=>x.gen?Math.random():sigOf(x))).size,capI=famN<slots*C.maxI*2?Math.max(2,Math.floor(famN/(slots*2))):0;
  const avg=Math.max(total*0.55/slots,Math.min(2,total/slots));
  const rot={},used=[],parts=[];let tk=new Set();const famU=new Set();
  const take=(k,n)=>{const out=[],arr=byK[k];for(let i=0;i<arr.length&&out.length<n;){const x=arr[i],f=x.gen?null:sigOf(x);if(f&&famU.has(f)){i++;continue}arr.splice(i,1);if(f)famU.add(f);out.push(x)}
@@ -4086,7 +4096,7 @@ function buildExam(gk,sub,type,unit){
   if(!k)break;tk.add(k);
   rot[k]=(rot[k]||0)+1;
   let want=sub==='math'?(early?4:3):({def:5,why:4,fn:4,loc:4,diff:3,irab:4,fix:3,tr:3,blank:5,mcq:5,tf:5,calc:3,dna:1,ext:4}[k]||3);
-  if(k!=='psg'&&k!=='dna'&&sub!=='math')want=Math.max(EX.minI,Math.min(want,EX.maxI,Math.max(EX.minI,Math.round(avg*1.2)||EX.minI)));
+  if(k!=='psg'&&k!=='dna'&&sub!=='math')want=Math.max(C.minI,Math.min(want,C.maxI,Math.max(C.minI,Math.round(avg*1.2)||C.minI)));
   if(capI&&k!=='psg'&&k!=='dna')want=Math.min(want,capI);
   const raw=take(k,want);if(!raw.length){byK[k]=[];si--;continue}
   let choose=null;
@@ -4098,7 +4108,7 @@ function buildExam(gk,sub,type,unit){
  }
  earlyMCQ(gk,parts,pool);
  // موضوع واحد؟ نقسّم الفروع حتى يطلع العدد الكامل من الأسئلة
- while(parts.length<nQ*2){const i=parts.findIndex(p=>p.k!=='psg'&&p.items.length>=4);if(i<0)break;const p=parts[i];const half=Math.ceil(p.items.length/2);const np={k:p.k,choose:null,items:p.items.splice(half)};p.choose=null;parts.splice(i+1,0,np)}
+ while(parts.length<nQ*nP){const i=parts.findIndex(p=>p.k!=='psg'&&p.items.length>=4);if(i<0)break;const p=parts[i];const half=Math.ceil(p.items.length/2);const np={k:p.k,choose:null,items:p.items.splice(half)};p.choose=null;parts.splice(i+1,0,np)}
  const qn=Math.min(nQ,Math.max(1,Math.floor(parts.length/nP))),qs=[];
  const P2=parts.slice();
  const OBJ=['mcq','tf','blank'];
@@ -4460,9 +4470,9 @@ const LS={get(k,d){try{const v=localStorage.getItem('saffi_'+k);return v?JSON.pa
 const U={name:LS.get('name',''),grade:LS.get('grade',null),dark:LS.get('dark',false),hist:LS.get('hist',[])};
 S.name=U.name;
 let V={unit:-1,scr:U.grade?'home':'ob',ob:0,obStage:null,sub:null,tab:'u',exam:null,review:false,t0:0,timer:null};
-const TN={m:'شهري',h:'نصف السنة',f:'نهائي'};
+const TN={m:'شهري',h:'نصف السنة',f:'نهائي',c:'شامل'};
 const tName=(t,g)=>t==='f'?(g.wiz?'وزاري':'نهائي'):TN[t];
-const TIME={m:45,h:120,f:180};
+const TIME={m:45,h:120,f:180,c:120};
 const ICON={
  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
  books:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>',
@@ -4695,10 +4705,11 @@ function homeV(){
 /* ---------- صفحة المادة ---------- */
 function subV(){
  const g=GR[U.grade],m=SUB[V.sub],st=stats(U.grade,V.sub);
- const X=ADM.cfg.exam;const acts=[['m','calendar','#12B886','شهري',toAr(X.m.nQ)+' أسئلة'],['h','book','#3B82F6','نصف السنة',toAr(X.h.nQ)+' أسئلة'],['f','landmark','#F2994A',g.wiz?'وزاري':'نهائي',g.wiz?toAr(X.f.nQ)+' أسئلة · نموذج رسمي':toAr(X.fn.nQ)+' أسئلة']];
+ const XC=t=>exCfg(U.grade,t);const acts=[['m','calendar','#12B886','شهري',toAr(XC('m').nQ)+' أسئلة'],['h','book','#3B82F6','نصف السنة',toAr(XC('h').nQ)+' أسئلة'],['f','landmark','#F2994A',g.wiz?'وزاري':'نهائي',toAr(XC('f').nQ)+' أسئلة'+(XC('f').key==='f'?' · نموذج رسمي':'')]];
  const wn=(poolFor(U.grade,V.sub,-1)||[]).filter(x=>x.wz).length;
  return `<div class="shead" style="--sc:${m.c}"><button class="back" onclick="go('home')">${I('back')}</button><div class="big">${I(m.ic)}</div><h1>${m.n}</h1><p>${g.n} · ${toAr(st.total)} سؤال · ${toAr(st.units.length)} فصول</p></div>
  <div class="pad" style="margin-top:-26px;position:relative;z-index:2"><button class="quizbig" onclick="openQB()"><div><b>اختبرني</b><small>اختار الفصول ونوع الأسئلة وعددها</small></div><span class="play">${I('play')}</span></button></div>
+ <div class="pad" style="margin-top:12px"><button class="fullbtn" onclick="startFull()"><span class="sq">${I('layers')}</span><div><b>امتحان شامل لكل المادة</b><small>${toAr(XC('c').nQ)} أسئلة من كل الفصول · ${toAr(XC('c').dur||120)} دقيقة</small></div><span class="play">${I('play')}</span></button></div>
  <div class="h" style="margin-top:22px"><h3>سوّي امتحان</h3></div>
  <div class="acts4" style="margin-top:0">${acts.map(a=>`<button class="act" onclick="openEB('${a[0]}')"><span class="ic" style="background:${a[2]};box-shadow:0 8px 16px -8px ${a[2]}">${I(a[1])}</span><b>${a[3]}</b><small>${a[4]}</small></button>`).join('')}</div>
  ${wn?`<div class="pad" style="margin-top:12px"><button class="etype wzrow" onclick="openQB();V.qb.src='wiz';render()"><span class="sq" style="background:#FFB020;color:#fff">${I('award')}</span><div><b>الأسئلة الوزارية السابقة</b><small>${toAr(wn)} سؤال ورد في امتحانات الوزارة</small></div><span style="margin-inline-start:auto;color:var(--ink3)">${I('chevron',18)}</span></button></div>`:''}
@@ -4748,6 +4759,7 @@ function startQuiz(){
 }
 
 /* ---------- منشئ الامتحانات ---------- */
+function startFull(){const C=exCfg(U.grade,'c');V.eb={t:'c',ls:null,dur:C.dur||120};startExam('c')}
 function openEB(t){const st=stats(U.grade,V.sub);V.open=new Set();V.eb={t,ls:allKeys(st),dur:t==='m'?60:t==='h'?120:180};go('eb')}
 function ebV(){
  const e=V.eb,st=stats(U.grade,V.sub),g=GR[U.grade],m=SUB[V.sub];
@@ -4756,7 +4768,7 @@ function ebV(){
  return `<div class="ebar"><div class="erow"><button class="x" onclick="go('sub')">${I('back')}</button><div class="tt"><b>${tt}</b><small>${m.n} · ${g.n}</small></div></div></div>
  ${step(1,'اختر الفصول والمواضيع',e.ls.length?`${toAr(e.ls.length)} مواضيع`:'لم تختر بعد',`<div class="chips"><button class="chip" onclick="V.eb.ls=allKeys(stats(U.grade,V.sub));render()">تحديد الكل</button><button class="chip" onclick="V.eb.ls=[];render()">إلغاء التحديد</button></div>${picker(e,'eb')}`)}
  ${step(2,'مدة الامتحان',DUR.find(d=>d[0]===e.dur)[1],`<div class="chips">${DUR.map(d=>`<button class="chip ${e.dur===d[0]?'on':''}" onclick="V.eb.dur=${d[0]};render()">${d[1]}</button>`).join('')}</div>`)}
- ${step(3,'صيغة الورقة','تلقائية · ١٠٠ درجة',`<p class="muted2">${(()=>{const X=ADM.cfg.exam;return e.t==='f'&&g.wiz&&g.b!=='p56'?`${toAr(X.f.nQ)} أسئلة بنموذج وزاري، يُحتسب أفضل ${toAr(X.f.best)}.`:`${toAr(e.t==='m'?X.m.nQ:e.t==='h'?X.h.nQ:X.fn.nQ)} أسئلة، الدرجة الكلية ١٠٠.`})()} كل سؤال بيه ${toAr(ADM.cfg.exam.nP)} فروع، وكل فرع بيه نقاط.</p>`)}
+ ${step(3,'صيغة الورقة','تلقائية · ١٠٠ درجة',`<p class="muted2">${(()=>{const C=exCfg(U.grade,e.t);return C.key==='f'?`${toAr(C.nQ)} أسئلة بنموذج وزاري، يُحتسب أفضل ${toAr(C.best)}.`:`${toAr(C.nQ)} أسئلة، الدرجة الكلية ١٠٠.`})()} كل سؤال بيه ${toAr(exCfg(U.grade,e.t).nP)} فروع، وكل فرع بيه من ${toAr(exCfg(U.grade,e.t).minI)} إلى ${toAr(exCfg(U.grade,e.t).maxI)} نقاط.</p>`)}
  <div style="height:90px"></div>
  <div class="ebottom"><button class="btnp" ${e.ls.length?'':'disabled'} onclick="startExam()">${e.ls.length?'أنشئ الامتحان':'اختر فصلاً أولاً'}</button></div>`;
 }
@@ -4770,7 +4782,7 @@ function tick(){if(V.left==null)return;V.left--;const el=$('#tm');if(el){el.text
 /* ---------- عرض الامتحان ---------- */
 function examV(){
  const E=V.exam,g=E.g,wiz=E.type==='f'&&g.wiz,[a,n]=counts(),R=V.review,ul=uLabel(E);
- const tn={m:'الامتحان الشهري',h:'امتحان نصف السنة',f:wiz?'الامتحان العام — الدور الأول':'الامتحان النهائي'}[E.type];
+ const tn={c:'الامتحان الشامل',m:'الامتحان الشهري',h:'امتحان نصف السنة',f:wiz?'الامتحان العام — الدور الأول':'الامتحان النهائي'}[E.type];
  const right=R?`<span class="timer" style="color:${scoreCol(E.total)}">${toAr(E.total)}/١٠٠</span>`:V.left!=null?`<span class="timer" id="tm">${fmt(V.left)}</span>`:`<span class="timer">∞</span>`;
  let h=`<div class="ebar"><div class="erow"><button class="x" onclick="${R?"go('result')":'quitExam()'}">${I('x')}</button><div class="tt"><b>${E.quiz?'اختبرني':tName(E.type,g)} — ${SUB[E.sub].n}${ul?' · '+ul:''}</b><small>${R?'الأجوبة والتصحيح':`أجبت ${toAr(a)} من ${toAr(n)}`}</small></div>${right}</div>
  ${R?'':`<div class="prog"><i id="pg" style="width:${a/n*100}%"></i></div>`}
@@ -4906,7 +4918,7 @@ function sheetV(E,R,g,wiz,ul){
  const sub=SUB[E.sub].n,en=E.en,m=SUB[E.sub];
  const dur=E.quiz?'':(V.eb&&V.eb.dur?({30:'نصف ساعة',60:'ساعة',90:'ساعة ونصف',120:'ساعتان',180:'ثلاث ساعات'}[V.eb.dur]||''):'ثلاث ساعات');
  const branch=/العلمي/.test(g.n)?' — الفرع العلمي':/الأدبي/.test(g.n)?' — الفرع الأدبي':'';
- const ttl=E.paper?esc(E.paper):E.quiz?'اختبار ذاتي':wiz?`الامتحانات العامة ل${stageName(g)}${branch}`:E.type==='h'?'امتحان نصف السنة':E.type==='m'?'الامتحان الشهري':'امتحان نهاية السنة';
+ const ttl=E.paper?esc(E.paper):E.quiz?'اختبار ذاتي':wiz?`الامتحانات العامة ل${stageName(g)}${branch}`:E.type==='c'?'الامتحان الشامل':E.type==='h'?'امتحان نصف السنة':E.type==='m'?'الامتحان الشهري':'امتحان نهاية السنة';
  const tag=E.quiz?(ul||'المنهج كاملاً'):wiz?'الدور الأول · ٢٠٢٦':'العام الدراسي ٢٠٢٥–٢٠٢٦';
  let h=`<div class="xs" style="--sc:${m.c}">
  <div class="xh">
@@ -4933,12 +4945,12 @@ function sheetV(E,R,g,wiz,ul){
 const ADM_DEF={
  site:{notice:''},
  grades:{},subs:{},gsub:{},units:{},hideQ:[],papers:[],
- exam:{ai:false,m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},nP:2,minI:2,maxI:6,choose:true,
+ exam:{ai:false,m:{nQ:4},h:{nQ:5},f:{nQ:6,best:5},fn:{nQ:5},c:{nQ:6,nP:3,dur:120},byG:{},nP:2,minI:2,maxI:6,choose:true,
   h1:'جمهورية العراق',h2:'وزارة التربية',h3:'المديرية العامة للتقويم والامتحانات',wm:'نموذج تدريبي · منصة صفّي'}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function admMerge(c){c=c||{};const o=clone(ADM_DEF);for(const k in c){if(k==='exam')continue;o[k]=c[k]}
- o.exam=Object.assign(clone(ADM_DEF.exam),c.exam||{});if(o.exam.maxI===4&&!o.exam.maxISet)o.exam.maxI=6;['m','h','f','fn'].forEach(t=>o.exam[t]=Object.assign({},ADM_DEF.exam[t],(c.exam||{})[t]||{}));return o}
+ o.exam=Object.assign(clone(ADM_DEF.exam),c.exam||{});if(o.exam.maxI===4&&!o.exam.maxISet)o.exam.maxI=6;['m','h','f','fn','c'].forEach(t=>o.exam[t]=Object.assign({},ADM_DEF.exam[t],(c.exam||{})[t]||{}));o.exam.byG=Object.assign({},(c.exam||{}).byG||{});return o}
 var ADM={cfg:clone(ADM_DEF),qs:[],user:null,isAdmin:false,loaded:false};
 
 const qToRow=q=>({grades:q.grades,subject:q.sub,unit:q.unit,lesson:q.les||null,kind:q.k,wz:!!q.wz,active:true,
@@ -5292,15 +5304,24 @@ async function admPSave(){const B=V.ad.pb;B.qs=B.qs.map(q=>({parts:q.parts.filte
  ADM.cfg.papers=ADM.cfg.papers||[];if(B.id){const i=ADM.cfg.papers.findIndex(x=>x.id===B.id);ADM.cfg.papers[i]=B}else{B.id='p'+Date.now().toString(36);ADM.cfg.papers.push(B)}V.ad.pb=null;await admSave('انتشر الامتحان ✓')}
 
 /* ----- إعدادات الامتحان ----- */
-function adExam(){const X=ADM.cfg.exam,num=(path,v,mn,mx)=>`<input class="inp num" type="number" min="${mn}" max="${mx}" value="${v}" onchange="admSetX('${path}',+this.value)">`;
- return `<div class="cfg"><div class="cfgh"><b>عدد الأسئلة</b></div>
- <div class="adkv"><span>الشهري</span>${num('m.nQ',X.m.nQ,1,10)}</div><div class="adkv"><span>نصف السنة</span>${num('h.nQ',X.h.nQ,1,10)}</div>
- <div class="adkv"><span>الوزاري (السادس والثالث)</span>${num('f.nQ',X.f.nQ,1,10)}</div><div class="adkv"><span>يُحسب أفضل … أسئلة بالوزاري</span>${num('f.best',X.f.best,1,10)}</div>
- <div class="adkv"><span>النهائي (باقي الصفوف)</span>${num('fn.nQ',X.fn.nQ,1,10)}</div></div>
- <div class="cfg"><div class="cfgh"><b>شكل السؤال</b></div>
- <div class="adkv"><span>عدد الفروع بكل سؤال (أ، ب، ج)</span>${num('nP',X.nP,1,4)}</div>
- <div class="adkv"><span>أقل عدد نقاط بالفرع</span>${num('minI',X.minI,1,6)}</div><div class="adkv"><span>أكثر عدد نقاط بالفرع</span>${num('maxI',X.maxI,1,8)}</div>
- <label class="ck" style="margin-top:8px"><input type="checkbox" ${X.choose?'checked':''} onchange="admSetX('choose',this.checked)"><span>أسئلة اختيارية (عرّف اثنين من ثلاثة)</span></label></div>
+function adExam(){const X=ADM.cfg.exam,gk=V.ad.xg||'',g=gk?GR[gk]:null;
+ const keys=[['m','الامتحان الشهري'],['h','امتحان نصف السنة'],['fn','الامتحان النهائي'],['f','الامتحان الوزاري'],['c','الامتحان الشامل (كل المادة)']].filter(k=>!g||(k[0]==='f'?(g.wiz&&g.b!=='p56'):k[0]==='fn'?!(g.wiz&&g.b!=='p56'):true));
+ const eff=k=>exRaw(gk,k);const own=(k,f)=>gk&&X.byG[gk]&&X.byG[gk][k]&&X.byG[gk][k][f]!=null;
+ const num=(k,f,mn,mx)=>`<input class="inp num ${own(k,f)?'own':''}" type="number" min="${mn}" max="${mx}" value="${eff(k)[f]}" onchange="admSetXG('${k}','${f}',+this.value)">`;
+ const opts=G.map(st=>`<optgroup label="${st.s}">${st.g.map(x=>`<option value="${x[0]}" ${gk===x[0]?'selected':''}>${x[1]}</option>`).join('')}</optgroup>`).join('');
+ return `<div class="cfg"><div class="cfgh"><b>شكل الامتحانات</b></div>
+ <label class="adl">الصف</label><select class="inp sel" onchange="V.ad.xg=this.value;render()"><option value="">كل الصفوف (الإعداد الأساسي)</option>${opts}</select>
+ <p class="muted2" style="margin-top:6px">${gk?`هذي الإعدادات لـ<b>${GR[gk].n}</b> بس. الخانة الملوّنة غيّرتها لهذا الصف، والباقي ياخذ من الإعداد الأساسي.`:'هذا الإعداد يمشي على كل الصفوف، إلا الصف اللي تغيّر إعداداته لحاله (اختاره من القائمة).'}</p>
+ ${keys.map(([k,n])=>`<div class="exbox"><b>${n}</b>
+  <div class="adkv"><span>عدد الأسئلة</span>${num(k,'nQ',1,10)}</div>
+  <div class="adkv"><span>عدد الفروع بكل سؤال (أ، ب، ج)</span>${num(k,'nP',1,4)}</div>
+  <div class="adkv"><span>أقل عدد نقاط بالفرع</span>${num(k,'minI',1,8)}</div>
+  <div class="adkv"><span>أكثر عدد نقاط بالفرع</span>${num(k,'maxI',1,10)}</div>
+  ${k==='f'?`<div class="adkv"><span>يُحسب أفضل … أسئلة</span>${num(k,'best',1,10)}</div>`:''}
+  ${k==='c'?`<div class="adkv"><span>المدة (دقيقة)</span>${num(k,'dur',10,240)}</div>`:''}</div>`).join('')}
+ ${gk&&X.byG[gk]?`<button class="btns" style="margin-top:8px" onclick="delete ADM.cfg.exam.byG['${gk}'];admSave()">رجّع ${GR[gk].n} للإعداد الأساسي</button>`:''}
+ ${gk?`<button class="btns" style="margin-top:8px" onclick="admCopyXG('${gk}')">طبّق إعدادات هذا الصف على كل صفوف مرحلته</button>`:''}
+ <label class="ck" style="margin-top:10px"><input type="checkbox" ${X.choose?'checked':''} onchange="admSetX('choose',this.checked)"><span>أسئلة اختيارية (عرّف اثنين من ثلاثة)</span></label></div>
  <div class="cfg"><div class="cfgh"><b>التصحيح بالذكاء الاصطناعي</b></div>
  <label class="ck"><input type="checkbox" ${X.ai?'checked':''} onchange="admSetX('ai',this.checked)"><span>صحّح أجوبة الكتابة بالمعنى باستعمال الذكاء الاصطناعي</span></label>
  <p class="muted2">يشتغل بعد ما تنشر دالة grade على Supabase وتضيف مفتاح Anthropic (الخطوات بملف README). الجواب ياخذ الأعلى بين التصحيح المحلي وتصحيح الذكاء الاصطناعي. إذا الدالة ما اشتغلت، الموقع يرجع للتصحيح المحلي تلقائياً.</p>${SB?'':'<p class="muted2" style="color:var(--bad)">يحتاج Supabase مربوط.</p>'}</div>
@@ -5308,6 +5329,11 @@ function adExam(){const X=ADM.cfg.exam,num=(path,v,mn,mx)=>`<input class="inp nu
  ${[['h1','السطر الأول'],['h2','السطر الثاني'],['h3','الجهة (يسار)'],['wm','العلامة أسفل الورقة']].map(k=>`<label class="adl">${k[1]}</label><input class="inp" value="${esc(X[k[0]])}" onchange="admSetX('${k[0]}',this.value)">`).join('')}</div>
  <div class="cfg"><div class="cfgh"><b>إعلان للطلاب</b></div><textarea class="inp" rows="2" placeholder="يظهر بالصفحة الرئيسية (اتركه فارغاً لإخفائه)" onchange="ADM.cfg.site.notice=this.value;admSave()">${esc(ADM.cfg.site.notice||'')}</textarea></div>
  <button class="btns" onclick="if(confirm('ترجع إعدادات الامتحان للأصل؟')){ADM.cfg.exam=clone(ADM_DEF.exam);admSave()}">إرجاع الإعدادات الأصلية</button>`}
+function admSetXG(k,f,v){const X=ADM.cfg.exam,gk=V.ad.xg||'';if(!(v>0))return;
+ if(gk){X.byG[gk]=X.byG[gk]||{};X.byG[gk][k]=X.byG[gk][k]||{};X.byG[gk][k][f]=v;const e=exRaw(gk,k);if(e.minI>e.maxI){X.byG[gk][k].maxI=e.minI}}
+ else{X[k]=X[k]||{};X[k][f]=v;if(f==='maxI')X.maxISet=true;const e=exRaw('',k);if(e.minI>e.maxI)X[k].maxI=e.minI}
+ admSave()}
+function admCopyXG(gk){const X=ADM.cfg.exam,st=G.find(s=>s.g.some(x=>x[0]===gk));if(!st)return;const src=JSON.stringify(X.byG[gk]||{});st.g.forEach(x=>{if(x[0]!==gk)X.byG[x[0]]=JSON.parse(src)});toast('تطبّقت على '+st.s);admSave()}
 function admSetX(path,v){if(path==='maxI')ADM.cfg.exam.maxISet=true;const p=path.split('.');let o=ADM.cfg.exam;while(p.length>1)o=o[p.shift()];o[p[0]]=v;if(ADM.cfg.exam.minI>ADM.cfg.exam.maxI)ADM.cfg.exam.maxI=ADM.cfg.exam.minI;admSave()}
 
 /* ----- النتائج والبلاغات ----- */
@@ -5416,7 +5442,7 @@ async function admBulkMove(sub){const ids=V.ad.bulk||[];if(!ids.length||!sub)ret
 const UI_DEF={
  name:'صفّي',tag:'منصتك الدراسية',logo:'',letter:'ص',color:'#5B4DFF',color2:'#3D8BFF',
  home:[{id:'notice',on:1},{id:'hero',on:1},{id:'kpis',on:1},{id:'blocks',on:1},{id:'subjects',on:1},{id:'papers',on:1},{id:'recent',on:1}],
- sub:[{id:'quiz',on:1},{id:'exams',on:1},{id:'wiz',on:1},{id:'papers',on:1},{id:'units',on:1},{id:'note',on:1}],
+ sub:[{id:'quiz',on:1},{id:'full',on:1},{id:'exams',on:1},{id:'wiz',on:1},{id:'papers',on:1},{id:'units',on:1},{id:'note',on:1}],
  nav:{home:1,subs:1,hist:1,me:1},
  feat:{oath:1,dark:1,report:1,self:1,timer:1,kpis:1,book:1},
  blocks:[],txt:{}
@@ -5434,9 +5460,9 @@ const TXT_DEF={
 const TXT_GROUPS=[['صفحة الترحيب',['ob.title','ob.sub','ob.f1','ob.f2','ob.f3','ob.btn']],['الصفحة الرئيسية',['home.am','home.pm','hero.badge','hero.title','hero.sub','hero.btn','kpi.1','kpi.2','kpi.3','home.subjects','home.papers','home.recent','home.empty']],
  ['صفحة المادة',['sub.quiz','sub.quizSub','sub.exams','sub.m','sub.h','sub.f','sub.fn','sub.wiz','sub.papers','sub.units','sub.book','sub.noteReal']],['الشريط السفلي',['nav.home','nav.subs','nav.hist','nav.me']],['النتيجة',['res.pass','res.fail']]];
 const HOME_N={notice:'الإعلان',hero:'البطاقة الكبيرة (يلا نراجع)',kpis:'الإحصائيات',blocks:'بطاقاتك المخصصة',subjects:'المواد',papers:'الامتحانات الجاهزة',recent:'آخر النتائج'};
-const SUBP_N={quiz:'زر اختبرني',exams:'أزرار الامتحانات',wiz:'الأسئلة الوزارية',papers:'امتحانات الإدارة',units:'فصول المنهج',note:'ملاحظة المصدر'};
+const SUBP_N={quiz:'زر اختبرني',full:'زر الامتحان الشامل',exams:'أزرار الامتحانات',wiz:'الأسئلة الوزارية',papers:'امتحانات الإدارة',units:'فصول المنهج',note:'ملاحظة المصدر'};
 function UIc(){const u=ADM.cfg.ui||{};const o=Object.assign(clone(UI_DEF),u);o.nav=Object.assign({},UI_DEF.nav,u.nav||{});o.feat=Object.assign({},UI_DEF.feat,u.feat||{});o.txt=Object.assign({},u.txt||{});
- const fix=(arr,def)=>{arr=(arr||[]).filter(x=>def.some(d=>d.id===x.id));def.forEach(d=>{if(!arr.some(x=>x.id===d.id))arr.push(Object.assign({},d))});return arr};o.home=fix(u.home,UI_DEF.home);o.sub=fix(u.sub,UI_DEF.sub);return o}
+ const fix=(arr,def)=>{arr=(arr||[]).filter(x=>def.some(d=>d.id===x.id));def.forEach((d,di)=>{if(!arr.some(x=>x.id===d.id))arr.splice(Math.min(di,arr.length),0,Object.assign({},d))});return arr};o.home=fix(u.home,UI_DEF.home);o.sub=fix(u.sub,UI_DEF.sub);return o}
 function T(k,vars){let s=(UIc().txt[k]||TXT_DEF[k]||k);vars=Object.assign({name:UIc().name},vars||{});return String(s).replace(/\{(\w+)\}/g,(m,x)=>vars[x]!=null?vars[x]:m)}
 function shade(hex,p){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const f=x=>Math.max(0,Math.min(255,Math.round(x+(p<0?x:255-x)*p)));return '#'+[f(r),f(g),f(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function logoHTML(cls){const u=UIc();return u.logo?`<img class="${cls||''} lgimg" src="${u.logo}" alt="">`:esc(u.letter||u.name[0])}
@@ -5497,11 +5523,12 @@ function homeV(){
 }
 function subV(){
  const u=UIc(),g=GR[U.grade],m=SUB[V.sub],st=stats(U.grade,V.sub),X=ADM.cfg.exam;
- const acts=[['m','calendar','#12B886',T('sub.m'),toAr(X.m.nQ)+' أسئلة'],['h','book','#3B82F6',T('sub.h'),toAr(X.h.nQ)+' أسئلة'],['f','landmark','#F2994A',g.wiz?T('sub.f'):T('sub.fn'),g.wiz?toAr(X.f.nQ)+' أسئلة · نموذج رسمي':toAr(X.fn.nQ)+' أسئلة']];
+ const XC=t=>exCfg(U.grade,t);const acts=[['m','calendar','#12B886',T('sub.m'),toAr(XC('m').nQ)+' أسئلة'],['h','book','#3B82F6',T('sub.h'),toAr(XC('h').nQ)+' أسئلة'],['f','landmark','#F2994A',g.wiz?T('sub.f'):T('sub.fn'),toAr(XC('f').nQ)+' أسئلة'+(XC('f').key==='f'?' · نموذج رسمي':'')]];
  const wn=(poolFor(U.grade,V.sub,-1)||[]).filter(x=>x.wz).length,pp=papersFor(U.grade,V.sub);
  let first=true;const top=()=>{const s=first?'margin-top:-26px;position:relative;z-index:2':'margin-top:14px';first=false;return s};
  const S={
   quiz:()=>`<div class="pad" style="${top()}"><button class="quizbig" onclick="openQB()"><div><b>${esc(T('sub.quiz'))}</b><small>${esc(T('sub.quizSub'))}</small></div><span class="play">${I('play')}</span></button></div>`,
+  full:()=>`<div class="pad" style="${top()}"><button class="fullbtn" onclick="startFull()"><span class="sq">${I('layers')}</span><div><b>امتحان شامل لكل المادة</b><small>${toAr(XC('c').nQ)} أسئلة من كل الفصول · ${toAr(XC('c').dur||120)} دقيقة</small></div><span class="play">${I('play')}</span></button></div>`,
   exams:()=>{first=false;return `<div class="h" style="margin-top:22px"><h3>${esc(T('sub.exams'))}</h3></div><div class="acts4" style="margin-top:0">${acts.map(a=>`<button class="act" onclick="openEB('${a[0]}')"><span class="ic" style="background:${a[2]};box-shadow:0 8px 16px -8px ${a[2]}">${I(a[1])}</span><b>${esc(a[3])}</b><small>${a[4]}</small></button>`).join('')}</div>`},
   wiz:()=>wn?`<div class="pad" style="${top()}"><button class="etype wzrow" onclick="openQB();V.qb.src='wiz';render()"><span class="sq" style="background:#FFB020;color:#fff">${I('award')}</span><div><b>${esc(T('sub.wiz'))}</b><small>${toAr(wn)} سؤال ورد في امتحانات الوزارة</small></div><span style="margin-inline-start:auto;color:var(--ink3)">${I('chevron',18)}</span></button></div>`:'',
   papers:()=>pp.length?(first=false,`<div class="h"><h3>${esc(T('sub.papers'))}</h3></div><div class="list">${pp.map(p=>`<button class="etype" onclick="startPaper('${p.id}')"><span class="sq" style="background:${u.color};color:#fff">${I('landmark')}</span><div><b>${esc(p.title)}</b><small>${toAr(p.qs.length)} أسئلة${p.dur?' · '+(DUR.find(d=>d[0]===p.dur)||[0,''])[1]:''}</small></div><span style="margin-inline-start:auto;color:var(--ink3)">${I('chevron',18)}</span></button>`).join('')}</div>`):'',
@@ -5510,7 +5537,7 @@ function subV(){
   note:()=>(unitsFor(U.grade,V.sub)||{}).real?`<div class="note ok">${I('shield',18)} ${esc(T('sub.noteReal'))}</div>`:''
  };
  return `<div class="shead" style="--sc:${m.c}"><button class="back" onclick="go('home')">${I('back')}</button><div class="big">${I(m.ic)}</div><h1>${esc(m.n)}</h1><p>${esc(g.n)} · ${toAr(st.total)} سؤال · ${toAr(st.units.length)} فصول</p></div>`
-  +u.sub.filter(x=>x.on).map(x=>(S[x.id]||(()=>''))()).join('\n');
+  +(u.sub.some(x=>x.id==='full')?u.sub:(()=>{const a=u.sub.slice();const i=a.findIndex(x=>x.id==='quiz');a.splice(i+1,0,{id:'full',on:1});return a})()).filter(x=>x.on).map(x=>(S[x.id]||(()=>''))()).join('\n');
 }
 
 /* ---------- تبويب لوحة الإدارة: المظهر والواجهة ---------- */
@@ -5615,8 +5642,8 @@ function arDate(){try{return new Date().toLocaleDateString('ar-IQ-u-nu-arab',{da
 function offV(E,R,g,wiz,ul){
  const X=ADM.cfg.exam,sub=SUB[E.sub].n,u=UIc(),nm=esc(u.name);
  const dur=E.quiz?'غير محددة':(V.eb&&V.eb.dur?({30:'نصف ساعة',60:'ساعة واحدة',90:'ساعة ونصف',120:'ساعتان',180:'ثلاث ساعات'}[V.eb.dur]||toAr(V.eb.dur)+' دقيقة'):'ثلاث ساعات');
- const ttl=E.paper?esc(E.paper):E.quiz?'اختبار ذاتي':wiz?'أسئلة وزارية':E.type==='h'?'امتحان نصف السنة':E.type==='m'?'امتحان شهري':'امتحان نهاية السنة';
- const kind=E.quiz?'اختبار ذاتي':wiz?'وزاري':E.type==='h'?'نصف السنة':E.type==='m'?'شهري':'نهاية السنة';
+ const ttl=E.paper?esc(E.paper):E.quiz?'اختبار ذاتي':wiz?'أسئلة وزارية':E.type==='c'?'امتحان شامل':E.type==='h'?'امتحان نصف السنة':E.type==='m'?'امتحان شهري':'امتحان نهاية السنة';
+ const kind=E.quiz?'اختبار ذاتي':wiz?'وزاري':E.type==='c'?'شامل':E.type==='h'?'نصف السنة':E.type==='m'?'شهري':'نهاية السنة';
  const tot=E.qs.reduce((t,q)=>t+q.marks,0),best=E.best?E.qs.slice(0,E.best).reduce((t,q)=>t+q.marks,0):tot;
  const note=E.quiz?'أجب عن جميع الأسئلة':E.best?`أجب عن ${NUMW2[E.best]||toAr(E.best)} أسئلة فقط ولكل سؤال (${mkTxt(E.qs[0].marks)})`:'أجب عن جميع الأسئلة بحسب المطلوب';
  let h=`<div class="op np npa"><i class="sw1"></i><i class="sw2"></i>
