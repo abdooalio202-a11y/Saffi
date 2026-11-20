@@ -746,6 +746,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .npa .iskn{font:600 12px "IBM Plex Sans Arabic",sans-serif;color:#8a8170;margin-top:4px}
 .npa .xfb{font-family:"IBM Plex Sans Arabic",sans-serif}
 .lownote{display:flex;gap:8px;align-items:flex-start;background:var(--warnSoft);color:#8a5a00;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.7;margin:0 0 12px}.lownote svg{flex:0 0 auto;margin-top:3px}
+.shp{margin:6px 0 14px;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px -10px rgba(0,0,0,.35);background:#fff;min-height:120px;display:grid;place-items:center}.shp img{display:block;width:100%;max-height:58vh;object-fit:contain}
+.shareb{background:linear-gradient(135deg,#f59e0b,#ef4444)!important;box-shadow:0 4px 0 #b45309!important}
 </style>
 </head>
 <body>
@@ -3463,6 +3465,7 @@ d|الرمزية|مذهب أدبي يعبّر عن المعاني والمشاع
 <script>
 /* ===================== أيقونات ===================== */
 const IC={
+ share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/>',
  book:'<path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/>',
  pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
  feather:'<path d="M20.2 12.2a6 6 0 0 0-8.5-8.5L5 10.5V19h8.5z"/><path d="M16 8 2 22M17.5 15H9"/>',
@@ -4784,7 +4787,7 @@ function resultV(){
  <p>${esc(t>=50?T('res.pass',{name:U.name}):T('res.fail',{name:U.name}))}<br>${E.quiz?'اختبرني':tName(E.type,E.g)} · ${SUB[E.sub].n}${ul?' ('+ul+')':''} · ${toAr(E.dur)} دقيقة</p>
  <div class="stats" style="margin:0 0 12px"><div class="stat"><b style="color:var(--ok)">${toAr(ok)}</b><span>صحيحة</span></div><div class="stat"><b style="color:#d97706">${toAr(hf)}</b><span>جزئية</span></div><div class="stat"><b style="color:var(--bad)">${toAr(wr)}</b><span>خاطئة</span></div></div>
  ${E.quiz?'':`<div class="qbars">${E.qs.map((q,i)=>{const p=q.sc/q.marks*100;return `<div class="qb ${E.drop.includes(i)?'drop':''}"><b>${QN[i]}</b><div class="tr"><i style="width:${p}%;background:${scoreCol(p)}"></i></div><span style="text-align:left">${toAr(+q.sc.toFixed(1))}/${toAr(+q.marks.toFixed(0))}</span></div>`}).join('')}${E.best?`<div style="font-size:12.5px;color:var(--ink3);margin-top:6px">احتُسبت أفضل خمسة أسئلة كما في الوزاري</div>`:''}</div>`}
- ${(()=>{const n=E.qs.reduce((t,q)=>t+q.parts.reduce((s,p)=>s+p.items.length,0),0);return !E.quiz&&E.famN&&E.famN<n*2?`<div class="lownote">${I('alert',16)} <span>${E.unit&&E.unit!==-1?'المواضيع اللي اخترتها':'هالمادة'} بيها ${toAr(E.famN)} سؤال تقريباً بس، فبعض الأسئلة راح تتكرر بالإعادة (بصيغة ثانية إذا أمكن). حتى تطلع أسئلة جديدة أكثر اختار مواضيع أو فصول أكثر.</span></div>`:''})()}<div class="acts"><button class="btnp" onclick="V.review=true;go('exam')">${I('eye',18)} الأجوبة والتصحيح</button><button class="btns" onclick="${E.quiz?'startQuiz()':`startExam('${E.type}')`}">إعادة بأسئلة جديدة ↻</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`;
+ ${(()=>{const n=E.qs.reduce((t,q)=>t+q.parts.reduce((s,p)=>s+p.items.length,0),0);return !E.quiz&&E.famN&&E.famN<n*2?`<div class="lownote">${I('alert',16)} <span>${E.unit&&E.unit!==-1?'المواضيع اللي اخترتها':'هالمادة'} بيها ${toAr(E.famN)} سؤال تقريباً بس، فبعض الأسئلة راح تتكرر بالإعادة (بصيغة ثانية إذا أمكن). حتى تطلع أسئلة جديدة أكثر اختار مواضيع أو فصول أكثر.</span></div>`:''})()}<div class="acts"><button class="btnp shareb" onclick="shareResult()">${I('share',18)} شارك نتيجتك كصورة</button><button class="btnp" onclick="V.review=true;go('exam')">${I('eye',18)} الأجوبة والتصحيح</button><button class="btns" onclick="${E.quiz?'startQuiz()':`startExam('${E.type}')`}">إعادة بأسئلة جديدة ↻</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`;
 }
 
 /* ---------- ورقة الأسئلة الوزارية ---------- */
@@ -5654,6 +5657,85 @@ function toggleISkip(qi,pi,id){const E=V.exam;E.iskip=E.iskip||[];const p=E.qs[q
  const y=scrollY;render();scrollTo(0,y)}
 function npInit(){lockZoom(true);vvFix();const eb=document.querySelector('.ebar');if(eb)document.documentElement.style.setProperty('--ebh',eb.offsetHeight+'px');
  document.querySelectorAll('.np textarea.nl').forEach(t=>{t.style.height='auto';t.style.height=Math.max(68,t.scrollHeight+2)+'px'})}
+
+/* =====================================================================
+   مشاركة النتيجة كصورة: بطاقة باسم الطالب ودرجته وإطار المنصة واللوكو
+   ===================================================================== */
+function rrect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function cssVar(n,d){try{const v=getComputedStyle(document.documentElement).getPropertyValue(n).trim();return v||d}catch(e){return d}}
+function loadImg(src){return new Promise(res=>{if(!src)return res(null);const im=new Image();if(!/^data:/.test(src))im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src;setTimeout(()=>res(null),4000)})}
+function fitText(c,txt,max,size,weight,fam){let s=size;do{c.font=`${weight} ${s}px ${fam}`;if(c.measureText(txt).width<=max)break;s-=2}while(s>18);return s}
+function wrapLines(c,txt,max){const w=String(txt).split(' ');const out=[];let cur='';w.forEach(x=>{const t=cur?cur+' '+x:x;if(c.measureText(t).width>max&&cur){out.push(cur);cur=x}else cur=t});if(cur)out.push(cur);return out}
+
+async function makeResultCard(){
+ const E=V.exam,t=E.total,u=UIc(),W=1080,H=1350;
+ const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');
+ try{await document.fonts.ready}catch(e){}
+ const F='"IBM Plex Sans Arabic","Noto Naskh Arabic",Tahoma,sans-serif';
+ const brand=cssVar('--brand','#169a5c'),col=scoreCol(t);
+ c.direction='rtl';c.textBaseline='middle';
+ // الخلفية والإطار
+ c.fillStyle='#ffffff';c.fillRect(0,0,W,H);
+ c.save();c.globalAlpha=.07;c.fillStyle=brand;c.fillRect(0,0,W,H);c.restore();
+ rrect(c,30,30,W-60,H-60,46);c.fillStyle='#ffffff';c.fill();c.lineWidth=8;c.strokeStyle=brand;c.stroke();
+ rrect(c,50,50,W-100,H-100,34);c.lineWidth=2;c.globalAlpha=.35;c.stroke();c.globalAlpha=1;
+ // الزخارف (نفس شكل ورقة الأسئلة)
+ c.save();rrect(c,30,30,W-60,H-60,46);c.clip();c.strokeStyle=brand;c.lineWidth=26;c.globalAlpha=.9;
+ c.lineWidth=22;c.beginPath();c.arc(30,30,150,0,Math.PI/2);c.stroke();c.lineWidth=10;c.globalAlpha=.45;c.beginPath();c.arc(30,30,195,0.05,Math.PI/2-0.05);c.stroke();c.globalAlpha=.9;
+ c.lineWidth=22;c.beginPath();c.arc(W-30,H-30,150,Math.PI,1.5*Math.PI);c.stroke();c.lineWidth=10;c.globalAlpha=.45;c.beginPath();c.arc(W-30,H-30,195,Math.PI+0.05,1.5*Math.PI-0.05);c.stroke();c.restore();
+ // اللوكو
+ const L=150,lx=W-90-L,ly=95;const img=await loadImg(u.logo);
+ c.save();c.shadowColor='rgba(0,0,0,.18)';c.shadowBlur=24;c.shadowOffsetY=8;rrect(c,lx,ly,L,L,38);c.fillStyle=img?'#ffffff':brand;c.fill();c.restore();
+ if(img){c.save();rrect(c,lx,ly,L,L,38);c.clip();const s=Math.min(L/img.width,L/img.height),iw=img.width*s,ih=img.height*s;c.drawImage(img,lx+(L-iw)/2,ly+(L-ih)/2,iw,ih);c.restore()}
+ else{c.fillStyle='#fff';c.textAlign='center';c.font=`700 96px ${F}`;c.fillText(u.letter||u.name[0],lx+L/2,ly+L/2+6)}
+ // اسم المنصة
+ c.textAlign='right';const nx=lx-30,nmax=nx-90;
+ const pn=`منصة ${u.name} التعليمية`;fitText(c,pn,nmax,62,700,F);c.fillStyle=brand;c.fillText(pn,nx,ly+48);
+ c.font=`600 34px ${F}`;c.fillStyle='#6b7280';c.fillText(`مع ${u.name} .. نحقق التفوق`,nx,ly+112);
+ // خط فاصل
+ c.strokeStyle='#e5e7eb';c.lineWidth=3;c.beginPath();c.moveTo(110,300);c.lineTo(W-110,300);c.stroke();
+ // اسم الطالب
+ c.textAlign='center';c.font=`600 32px ${F}`;c.fillStyle='#6b7280';c.fillText('نتيجة الطالب',W/2,350);
+ const sn=U.name||'طالب';fitText(c,sn,W-220,68,700,F);c.fillStyle='#111827';c.fillText(sn,W/2,420);
+ // الحلقة
+ const cx=W/2,cy=640,R=165;c.lineCap='round';
+ c.lineWidth=34;c.strokeStyle='#eceef4';c.beginPath();c.arc(cx,cy,R,0,Math.PI*2);c.stroke();
+ c.strokeStyle=col;c.beginPath();c.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.005,Math.min(1,t/100)));c.stroke();
+ c.fillStyle=col;c.font=`700 140px ${F}`;c.fillText(toAr(t),cx,cy-12);
+ c.fillStyle='#9ca3af';c.font=`600 36px ${F}`;c.fillText('من ١٠٠',cx,cy+82);
+ // التقدير
+ c.fillStyle=col;c.font=`700 70px ${F}`;c.fillText(est(t),cx,895);
+ // المادة ونوع الامتحان
+ const ul=uLabel(E);const info=`${E.quiz?'اختبرني':tName(E.type,E.g)} · ${SUB[E.sub].n}${ul?' ('+ul+')':''}`;
+ c.font=`600 34px ${F}`;c.fillStyle='#4b5563';const lines=wrapLines(c,info,W-240).slice(0,2);
+ lines.forEach((l,i)=>c.fillText(l,cx,965+i*48));
+ // الإحصاءات
+ let ok=0,hf=0,wr=0;const sk=E.iskip||[],qs=E.skip||[];E.qs.forEach((q,qi)=>{if(qs.includes(qi))return;q.parts.forEach(p=>p.items.forEach(it=>{if(sk.includes(it.id))return;if(it.sc>=it.mk-1e-6)ok++;else if(it.sc>0)hf++;else wr++}))});
+ const st=[['صحيحة',ok,'#16a34a'],['جزئية',hf,'#d97706'],['خاطئة',wr,'#dc2626']];const bw=250,bh=120,gap=30,by=1035+(lines.length>1?30:0),bx0=(W-(bw*3+gap*2))/2;
+ st.forEach((s,i)=>{const x=W-bx0-bw-i*(bw+gap);rrect(c,x,by,bw,bh,26);c.fillStyle='#f6f7fb';c.fill();c.fillStyle=s[2];c.font=`700 54px ${F}`;c.fillText(toAr(s[1]),x+bw/2,by+46);c.fillStyle='#6b7280';c.font=`600 28px ${F}`;c.fillText(s[0],x+bw/2,by+92)});
+ // التذييل
+ const fy=H-150;rrect(c,240,fy,W-480,64,32);c.fillStyle=brand;c.fill();
+ c.fillStyle='#fff';c.font=`600 30px ${F}`;c.textAlign='right';c.fillText(arDate(),W-275,fy+33);
+ c.textAlign='left';c.direction='ltr';c.fillText(location.host||'',275,fy+33);c.direction='rtl';
+ return cv;
+}
+
+async function shareResult(){
+ sheet(`<div class="grab"></div><h3>مشاركة النتيجة</h3><div class="shp"><div class="splash"><i></i></div></div>`);
+ let cv;try{cv=await makeResultCard()}catch(e){console.warn(e);sheet(`<div class="grab"></div><h3>ما گدرنا نسوي الصورة</h3><p class="sub2">جرّب مرة ثانية.</p>`);return}
+ const url=cv.toDataURL('image/png');V.shareImg={cv,url};
+ const canShare=!!(navigator.canShare&&navigator.share);
+ sheet(`<div class="grab"></div><h3>مشاركة النتيجة</h3><div class="shp"><img src="${url}" alt="النتيجة"></div>
+  <div style="display:grid;gap:10px">${canShare?`<button class="btnp" onclick="doShareImg()">${I('share',18)} مشاركة الصورة</button>`:''}
+  <a class="btns" style="text-align:center;text-decoration:none;display:block" href="${url}" download="نتيجتي-${(U.name||'').replace(/\s+/g,'-')}.png">حفظ الصورة</a>
+  <p class="sub2" style="margin:0;text-align:center;font-size:12.5px">إذا ما اشتغل الحفظ: اضغط مطولاً على الصورة واختار «حفظ الصورة»</p></div>`);
+}
+async function doShareImg(){const s=V.shareImg;if(!s)return;
+ const blob=await new Promise(r=>s.cv.toBlob(r,'image/png'));if(!blob)return toast('ما گدرنا نجهز الصورة');
+ const f=new File([blob],'natija.png',{type:'image/png'});const u=UIc();
+ try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'نتيجتي',text:`نتيجتي بمنصة ${u.name} التعليمية: ${toAr(V.exam.total)}/١٠٠ — ${location.origin}`});
+  else await navigator.share({title:'نتيجتي',text:`نتيجتي بمنصة ${u.name} التعليمية: ${toAr(V.exam.total)}/١٠٠`,url:location.origin})}
+ catch(e){if(e&&e.name!=='AbortError')toast('المشاركة ما اشتغلت، احفظ الصورة')}}
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
