@@ -4002,14 +4002,21 @@ function makeItem(sub,b,it){
  return o;
 }
 /* ذاكرة الأسئلة: الأقل استعمالاً أولاً حتى تتغير الأسئلة كل مرة */
-const SEEN={k:(gk,sub)=>'sf_'+gk+'_'+sub,
+/* بصمة قصيرة للسؤال حتى ذاكرة الأسئلة تبقى صغيرة وما تمتلي ذاكرة المتصفح */
+const hk=s=>{s=String(s);let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)};
+const SEEN={k:(gk,sub)=>'sf2_'+gk+'_'+sub,
  mem:{},
- get(gk,sub){try{const s=localStorage.getItem(this.k(gk,sub));if(s)return JSON.parse(s)}catch(e){}return this.mem[this.k(gk,sub)]||{}},
- put(gk,sub,list){try{const m=this.get(gk,sub),t=Date.now();list.forEach((s,i)=>m[s]=t+i);const ks=Object.keys(m).sort((a,b)=>m[b]-m[a]).slice(0,4000);const o={};ks.forEach(x=>o[x]=m[x]);this.mem[this.k(gk,sub)]=o;localStorage.setItem(this.k(gk,sub),JSON.stringify(o))}catch(e){}}};
+ get(gk,sub){const k=this.k(gk,sub);if(this.mem[k])return this.mem[k];let m={};try{const s=localStorage.getItem(k);if(s)m=JSON.parse(s)||{}}catch(e){}this.mem[k]=m;return m},
+ put(gk,sub,list){const k=this.k(gk,sub),m=this.get(gk,sub),t=Date.now();list.forEach((s,i)=>m[hk(s)]=t+i);
+  const ks=Object.keys(m);if(ks.length>5000){ks.sort((a,b)=>m[b]-m[a]).slice(5000).forEach(x=>delete m[x])}
+  this.mem[k]=m;const js=JSON.stringify(m);
+  try{localStorage.setItem(k,js)}catch(e){try{SEEN.free();localStorage.setItem(k,js)}catch(e2){}}},
+ // تنظيف الذاكرة القديمة والكبيرة
+ free(){try{const rm=[];for(let i=0;i<localStorage.length;i++){const x=localStorage.key(i);if(/^sf_/.test(x)||x==='saffi_cache')rm.push(x)}rm.forEach(x=>localStorage.removeItem(x))}catch(e){}}};
 const stripWz=s=>String(s==null?'':s).replace(/\s*\((?:وزاري|وزارية)[^)]*\)/g,'').trim();
 const qKey=s=>nz(stripWz(s)).replace(/[^\u0621-\u064A0-9a-z ]/g,'').replace(/\s+/g,' ').trim();
 const sigOf=x=>x.gen?'g:'+x.gen+':'+Math.random():(qKey(x.fam||x.q||x.text)||x.k);
-function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map(x=>[m[sigOf(x)]||0,m['i:'+(x.q||x.text)]||0,x]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p[2])}
+function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map(x=>[x.gen?0:(m[hk(sigOf(x))]||0),m[hk('i:'+(x.q||x.text))]||0,x]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p[2])}
 function seenMark(gk,sub,items){SEEN.put(gk,sub,items.filter(x=>!x.gen).flatMap(x=>[sigOf(x),'i:'+(x.q||x.text)]))}
 const NUMW={1:'واحداً',2:'اثنين',3:'ثلاثاً',4:'أربعاً',5:'خمساً'};
 const OPTK=['def','why','fn','diff','irab','fix','tr','loc'];
@@ -5644,13 +5651,17 @@ function toggleISkip(qi,pi,id){const E=V.exam;E.iskip=E.iskip||[];const p=E.qs[q
 function npInit(){lockZoom(true);vvFix();const eb=document.querySelector('.ebar');if(eb)document.documentElement.style.setProperty('--ebh',eb.offsetHeight+'px');
  document.querySelectorAll('.np textarea.nl').forEach(t=>{t.style.height='auto';t.style.height=Math.max(68,t.scrollHeight+2)+'px'})}
 /* ---------- تشغيل ---------- */
+// نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
+const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
+ async get(k){try{const d=await this.open();return await new Promise(res=>{const t=d.transaction('kv').objectStore('kv').get(k);t.onsuccess=()=>res(t.result||null);t.onerror=()=>res(null)})}catch(e){return null}},
+ async set(k,v){try{const d=await this.open();await new Promise(res=>{const t=d.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=res;t.onerror=res;t.onabort=res})}catch(e){}}};
 function bootRoute(){if(location.hash==='#admin'){V.scr='admin'}}
 window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin')});
 (async function boot(){
  if(!SB){const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}ADM.loaded=true}
  else{
   // آخر نسخة محفوظة بالجهاز تطلع فوراً، وللزائر الجديد نعرض شاشة تحميل لحد ما توصل الهوية الصحيحة
-  const c=LS.get('cache',null);
+  SEEN.free();let c=null;try{c=await IDB.get('cache')}catch(e){}
   if(c&&c.cfg){ADM.cfg=admMerge(c.cfg);ADM.qs=c.qs||[]}
   else{const a=document.getElementById('app');if(a)a.innerHTML='<div class="splash"><i></i></div>';
    await Promise.race([AST.load(),new Promise(r=>setTimeout(r,4000))])}
@@ -5659,7 +5670,7 @@ window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin'
  if(SB){
   const before=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
   await Promise.all([AST.load(),admSession()]);
-  try{localStorage.setItem('saffi_cache',JSON.stringify({cfg:ADM.cfg,qs:ADM.qs}))}catch(e){try{localStorage.setItem('saffi_cache',JSON.stringify({cfg:ADM.cfg,qs:[]}))}catch(e2){}}
+  IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs});
   const after=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
   if(before!==after||V.scr==='admin'){buildCUR();applyTheme();if(V.scr!=='exam')render()}
  }
