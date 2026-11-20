@@ -4875,10 +4875,15 @@ var ADM={cfg:clone(ADM_DEF),qs:[],user:null,isAdmin:false,loaded:false};
 const qToRow=q=>({grades:q.grades,subject:q.sub,unit:q.unit,lesson:q.les||null,kind:q.k,wz:!!q.wz,active:true,
  data:{q:q.q,o:q.o,a:q.a,m:q.m,kw:q.kw,alts:q.alts,text:q.text,subs:q.subs,ans:q.ans,year:q.year}});
 const rowToQ=r=>Object.assign({id:r.id,grades:r.grades||[],sub:r.subject,unit:r.unit,les:r.lesson,k:r.kind,wz:r.wz,created:r.created_at},r.data||{});
+// Supabase يرجّع 1000 سؤال بالطلب الواحد كحد أقصى، فنجيب الأسئلة على دفعات
+async function admFetchAllQs(){const step=1000;let all=[],from=0;
+ for(;;){const {data,error}=await SB.from('questions').select('*').eq('active',true).order('id',{ascending:true}).range(from,from+step-1);
+  if(error)throw error;all=all.concat(data||[]);if(!data||data.length<step)break;from+=step}
+ return all}
 const AST={
  async load(){
-  if(SB){try{const [a,b]=await Promise.all([SB.from('site_config').select('data').eq('id','main').maybeSingle(),SB.from('questions').select('*').eq('active',true).limit(50000)]);
-    if(a&&a.data)ADM.cfg=admMerge(a.data.data);if(b&&b.data)ADM.qs=b.data.map(rowToQ)}catch(e){console.warn('admin load',e)}}
+  if(SB){try{const [a,b]=await Promise.all([SB.from('site_config').select('data').eq('id','main').maybeSingle(),admFetchAllQs()]);
+    if(a&&a.data)ADM.cfg=admMerge(a.data.data);if(b)ADM.qs=b.map(rowToQ)}catch(e){console.warn('admin load',e)}}
   else{const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}}
   ADM.loaded=true;
  },
