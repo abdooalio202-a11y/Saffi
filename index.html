@@ -745,6 +745,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .npa .iskd .pqx{opacity:.5;text-decoration:line-through}
 .npa .iskn{font:600 12px "IBM Plex Sans Arabic",sans-serif;color:#8a8170;margin-top:4px}
 .npa .xfb{font-family:"IBM Plex Sans Arabic",sans-serif}
+.lownote{display:flex;gap:8px;align-items:flex-start;background:var(--warnSoft);color:#8a5a00;border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.7;margin:0 0 12px}.lownote svg{flex:0 0 auto;margin-top:3px}
 </style>
 </head>
 <body>
@@ -4016,7 +4017,7 @@ const SEEN={k:(gk,sub)=>'sf2_'+gk+'_'+sub,
 const stripWz=s=>String(s==null?'':s).replace(/\s*\((?:وزاري|وزارية)[^)]*\)/g,'').trim();
 const qKey=s=>nz(stripWz(s)).replace(/[^\u0621-\u064A0-9a-z ]/g,'').replace(/\s+/g,' ').trim();
 const sigOf=x=>x.gen?'g:'+x.gen+':'+Math.random():(qKey(x.fam||x.q||x.text)||x.k);
-function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map(x=>[x.gen?0:(m[hk(sigOf(x))]||0),m[hk('i:'+(x.q||x.text))]||0,x]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(p=>p[2])}
+function freshOrder(gk,sub,arr){const m=SEEN.get(gk,sub);return shuffle(arr).map(x=>[x.gen?0:(m[hk(sigOf(x))]||0),m[hk('i:'+(x.q||x.text))]||0,x]).sort((a,b)=>a[1]-b[1]||a[0]-b[0]).map(p=>p[2])}
 function seenMark(gk,sub,items){SEEN.put(gk,sub,items.filter(x=>!x.gen).flatMap(x=>[sigOf(x),'i:'+(x.q||x.text)]))}
 const NUMW={1:'واحداً',2:'اثنين',3:'ثلاثاً',4:'أربعاً',5:'خمساً'};
 const OPTK=['def','why','fn','diff','irab','fix','tr','loc'];
@@ -4046,6 +4047,8 @@ function buildExam(gk,sub,type,unit){
   :sub==='math'?[['calc'],['calc','mcq','blank','tf']]
   :[['def','why','psg','dna','fn','diff','loc','tr','fix','irab','calc'],['blank','mcq','tf','calc','fn','loc','why']];
  const total=Object.values(byK).reduce((s,a)=>s+a.length,0),slots=nQ*nP;
+ // أسئلة قليلة؟ نصغّر عدد الفقرات حتى الامتحان الجاي يطلع بأسئلة غير هاي
+ const famN=new Set(pool.map(x=>x.gen?Math.random():sigOf(x))).size,capI=famN<slots*EX.maxI*2?Math.max(2,Math.floor(famN/(slots*2))):0;
  const avg=Math.max(total*0.55/slots,Math.min(2,total/slots));
  const rot={},used=[],parts=[];let tk=new Set();const famU=new Set();
  const take=(k,n)=>{const out=[],arr=byK[k];for(let i=0;i<arr.length&&out.length<n;){const x=arr[i],f=x.gen?null:sigOf(x);if(f&&famU.has(f)){i++;continue}arr.splice(i,1);if(f)famU.add(f);out.push(x)}
@@ -4059,6 +4062,7 @@ function buildExam(gk,sub,type,unit){
   rot[k]=(rot[k]||0)+1;
   let want=sub==='math'?(early?4:3):({def:5,why:4,fn:4,loc:4,diff:3,irab:4,fix:3,tr:3,blank:5,mcq:5,tf:5,calc:3,dna:1,ext:4}[k]||3);
   if(k!=='psg'&&k!=='dna'&&sub!=='math')want=Math.max(EX.minI,Math.min(want,EX.maxI,Math.max(EX.minI,Math.round(avg*1.2)||EX.minI)));
+  if(capI&&k!=='psg'&&k!=='dna')want=Math.min(want,capI);
   const raw=take(k,want);if(!raw.length){byK[k]=[];si--;continue}
   let choose=null;
   if(EX.choose&&OPTK.includes(k)&&raw.length>=3)choose=raw.length-1;
@@ -4081,7 +4085,7 @@ function buildExam(gk,sub,type,unit){
   const w=q.parts.map(p=>p.k==='psg'?2:1),ws=w.reduce((a,c)=>a+c,0);
   let acc=0;q.parts.forEach((p,pi)=>{let m=pi===q.parts.length-1?qm-acc:Math.round(qm*w[pi]/ws);acc+=m;p.marks=m;
    const cnt=p.choose||p.items.length,per=m/cnt;p.items.forEach((it,i)=>{it.mk=per;it.id=`q${qi}p${pi}i${i}`})})});
- return{g,sub,type,qs,best,en,ans:{},unit:unit==null?-1:unit};
+ return{g,sub,type,qs,best,en,ans:{},unit:unit==null?-1:unit,famN};
 }
 let E_quizFlag=false;
 function scoreExam(E){
@@ -4205,7 +4209,7 @@ function buildCUR(){for(const k in CUR)delete CUR[k];
   let curU=null;
   const others=(arr,me,f)=>{const seen=new Set([nn(f(me))]),st=new Set([nn(me.q)]),out=[];const pref=sh(arr.filter(x=>curU&&curU.q.includes(x))).concat(sh(arr));for(const x of pref){if(out.length>=3)break;const v=f(x);if(!v||seen.has(nn(v))||st.has(nn(x.q)))continue;seen.add(nn(v));st.add(nn(x.q));out.push(v)}return out};
   us.forEach(u=>{if(doneU.has(u))return;doneU.add(u);u.ls.forEach(l=>{curU=u;const add=[];
-   l.q.forEach(x=>{const fam=x.q;if(x.wz||!x.q)return;
+   l.q.forEach(x0=>{const fam=x0.q;if(!x0.q)return;const x=x0.wz?Object.assign({},x0,{q:stripWz(x0.q)}):x0;
     if(x.k==='def'&&x.m&&defs.length>=4){
      const term=x.q.replace(/[«»]/g,'').trim(),alts=term.split(/[()]/).map(t=>t.trim()).filter(Boolean);
      add.push({k:'mcq',q:`المقصود بـ«${term}» هو:`,o:[clean(x.m)].concat(others(defs,x,d=>clean(d.m))),a:0,fam,der:1});
@@ -4780,7 +4784,7 @@ function resultV(){
  <p>${esc(t>=50?T('res.pass',{name:U.name}):T('res.fail',{name:U.name}))}<br>${E.quiz?'اختبرني':tName(E.type,E.g)} · ${SUB[E.sub].n}${ul?' ('+ul+')':''} · ${toAr(E.dur)} دقيقة</p>
  <div class="stats" style="margin:0 0 12px"><div class="stat"><b style="color:var(--ok)">${toAr(ok)}</b><span>صحيحة</span></div><div class="stat"><b style="color:#d97706">${toAr(hf)}</b><span>جزئية</span></div><div class="stat"><b style="color:var(--bad)">${toAr(wr)}</b><span>خاطئة</span></div></div>
  ${E.quiz?'':`<div class="qbars">${E.qs.map((q,i)=>{const p=q.sc/q.marks*100;return `<div class="qb ${E.drop.includes(i)?'drop':''}"><b>${QN[i]}</b><div class="tr"><i style="width:${p}%;background:${scoreCol(p)}"></i></div><span style="text-align:left">${toAr(+q.sc.toFixed(1))}/${toAr(+q.marks.toFixed(0))}</span></div>`}).join('')}${E.best?`<div style="font-size:12.5px;color:var(--ink3);margin-top:6px">احتُسبت أفضل خمسة أسئلة كما في الوزاري</div>`:''}</div>`}
- <div class="acts"><button class="btnp" onclick="V.review=true;go('exam')">${I('eye',18)} الأجوبة والتصحيح</button><button class="btns" onclick="${E.quiz?'startQuiz()':`startExam('${E.type}')`}">إعادة بأسئلة جديدة ↻</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`;
+ ${(()=>{const n=E.qs.reduce((t,q)=>t+q.parts.reduce((s,p)=>s+p.items.length,0),0);return !E.quiz&&E.famN&&E.famN<n*2?`<div class="lownote">${I('alert',16)} <span>${E.unit&&E.unit!==-1?'المواضيع اللي اخترتها':'هالمادة'} بيها ${toAr(E.famN)} سؤال تقريباً بس، فبعض الأسئلة راح تتكرر بالإعادة (بصيغة ثانية إذا أمكن). حتى تطلع أسئلة جديدة أكثر اختار مواضيع أو فصول أكثر.</span></div>`:''})()}<div class="acts"><button class="btnp" onclick="V.review=true;go('exam')">${I('eye',18)} الأجوبة والتصحيح</button><button class="btns" onclick="${E.quiz?'startQuiz()':`startExam('${E.type}')`}">إعادة بأسئلة جديدة ↻</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`;
 }
 
 /* ---------- ورقة الأسئلة الوزارية ---------- */
