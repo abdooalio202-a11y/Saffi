@@ -714,6 +714,37 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .pvb .pit{display:flex;gap:6px}.pvb .pit .px{flex:1}
 @media(max-width:420px){.npi{grid-template-columns:1fr 1fr}.npi>div:last-child{grid-column:1/-1;border-right:0;border-top:1.5px solid var(--pg2);display:grid;grid-template-columns:1fr 1fr;gap:0 8px}.npi>div:nth-child(2){border-right:1.5px solid var(--pg2)}.nps{display:none}.npf{grid-template-columns:1fr}}
 @media print{.np{box-shadow:none}}
+
+/* ===== الإجابة على نفس ورقة الأسئلة ===== */
+.npa{scroll-margin-top:var(--ebh,120px)}
+.npa .nq{scroll-margin-top:calc(var(--ebh,120px) + 10px)}
+.npa .nqr{font-size:12.5px;font-weight:700;white-space:nowrap}
+.npa .skipb{margin:8px 0 2px}
+.npa .pit.wa{padding:8px 4px 8px 6px;border-bottom:1px dashed #dfe9e3}
+.npa .pp .pit.wa:last-child{border-bottom:0}
+.npa .pqt{font-weight:600}
+.npa .chn{font:600 12px/1.6 "IBM Plex Sans Arabic",sans-serif;color:#8a5a00;background:#fff4dc;border-radius:8px;padding:4px 10px;margin-top:4px;display:inline-block}
+.npa .nl{display:block;width:100%;box-sizing:border-box;margin:6px 0 0;border:0;border-radius:0;outline:none;resize:none;color:#1537a8;font:400 16px/34px "Noto Naskh Arabic",serif;padding:0 6px;
+ background:repeating-linear-gradient(to bottom,transparent 0,transparent 33px,#c9c2b3 33px,#c9c2b3 34px);background-attachment:local;min-height:68px;box-shadow:none}
+.npa input.nl{min-height:0;height:36px;background:none;border-bottom:1.5px dotted #9b9483}
+.npa .nl:focus{background-color:#f3f6ff;box-shadow:none}
+.npa .nl::placeholder{color:#b5ad9c;font-size:14px}
+.npa .nl:disabled{opacity:1;-webkit-text-fill-color:#1537a8;color:#1537a8}
+.npa .nl.ltr{direction:ltr;text-align:left}
+.npa .pmo{margin-top:6px;gap:6px 8px}
+.npa .opt{all:unset;cursor:pointer;display:flex;align-items:center;gap:7px;padding:5px 8px 5px 6px;border-radius:12px;border:1.3px solid #e3ded2;font-weight:500;font-size:14.5px;line-height:1.5;box-sizing:border-box;min-height:38px}
+.npa .opt i{font-style:normal;flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:1.5px solid #555;display:grid;place-items:center;font-weight:700;font-size:13px}
+.npa .opt.on{border-color:#1537a8;color:#1537a8;background:#f3f6ff}.npa .opt.on i{background:#1537a8;border-color:#1537a8;color:#fff}
+.npa .opt.right{border-color:#1a7f37;color:#1a7f37;background:#eef8f0}.npa .opt.right i{background:#1a7f37;border-color:#1a7f37;color:#fff}
+.npa .opt.wrong{border-color:#c4161c;color:#c4161c;text-decoration:line-through}.npa .opt.wrong i{border-color:#c4161c;color:#c4161c}
+.npa .opt:disabled{cursor:default}
+.npa .tfb{display:flex;gap:8px;margin-top:6px}
+.npa .tfb .opt{padding-inline:10px 14px}
+.npa .iskb{all:unset;cursor:pointer;font:600 11.5px "IBM Plex Sans Arabic",sans-serif;color:#8a8170;border:1px dashed #b9b2a3;border-radius:999px;padding:1px 10px;margin-inline-start:8px;white-space:nowrap;vertical-align:middle}
+.npa .iskb.on{border-style:solid;border-color:#c98a00;color:#8a5a00;background:#fff4dc}
+.npa .iskd .pqx{opacity:.5;text-decoration:line-through}
+.npa .iskn{font:600 12px "IBM Plex Sans Arabic",sans-serif;color:#8a8170;margin-top:4px}
+.npa .xfb{font-family:"IBM Plex Sans Arabic",sans-serif}
 </style>
 </head>
 <body>
@@ -4510,8 +4541,8 @@ function itemV(it,i,en){
 }
 function bindExam(){
  if(V.review)return;
- document.querySelectorAll('.xs [data-id],.as [data-id]').forEach(el=>{
-  const upd=()=>{const[a,n]=counts();const p=$('#pg');if(p)p.style.width=a/n*100+'%';const s=$('.erow .tt small');if(s)s.textContent=`أجبت ${toAr(a)} من ${toAr(n)}`;V.exam.qs.forEach((q,i)=>{const b=document.getElementById('qn'+i);if(b)b.classList.toggle('done',qDone(q))})};
+ document.querySelectorAll('.xs [data-id],.as [data-id],.npa .opt[data-id],.npa .aa[data-id]').forEach(el=>{
+  const upd=()=>{const[a,n]=counts();const p=$('#pg');if(p)p.style.width=a/n*100+'%';const s=$('.erow .tt small');if(s)s.textContent=`أجبت ${toAr(a)} من ${toAr(n)}`;const mn=$('.erow2 .mini');if(mn)mn.textContent=`${toAr(a)}/${toAr(n)}`;V.exam.qs.forEach((q,i)=>{const b=document.getElementById('qn'+i);if(b)b.classList.toggle('done',qDone(q))})};
   if(el.tagName==='BUTTON')el.onclick=()=>{V.exam.ans[el.dataset.id]=el.dataset.v;el.parentNode.querySelectorAll('.opt').forEach(b=>b.classList.toggle('on',b===el));upd()};
   else el.oninput=()=>{V.exam.ans[el.dataset.id]=el.value;if(el.tagName==='TEXTAREA'){el.style.height='auto';el.style.height=Math.max(64,el.scrollHeight+2)+'px'}upd()};
  });
@@ -4602,7 +4633,7 @@ function render(){
  const a=$('#app');
  const f={ob:obV,home:homeV,subs:subsV,sub:subV,qb:qbV,eb:ebV,exam:examV,result:resultV,hist:histV,me:meV,admin:admV}[V.scr]||homeV;
  a.innerHTML=`<div class="scr">${f()}</div>`+(['home','subs','hist','me'].includes(V.scr)?navV():'');
- if(V.scr==='exam'){bindExam();if(!isEarly(V.exam))initPv()}else if(typeof lockZoom==='function'){lockZoom(false);document.documentElement.style.setProperty('--vvt','0px')}
+ if(V.scr==='exam'){bindExam();if(!isEarly(V.exam))npInit()}else if(typeof lockZoom==='function'){lockZoom(false);document.documentElement.style.setProperty('--vvt','0px')}
  if(V.scr==='result')animRing();
 }
 
@@ -4735,7 +4766,7 @@ function setTab(t,id){V.tab=t;render();if(id){const el=document.getElementById('
 
 function resultV(){
  const E=V.exam,t=E.total,c=scoreCol(t),[a,n]=counts();
- let ok=0,hf=0,wr=0;E.qs.forEach(q=>q.parts.forEach(p=>p.items.forEach(it=>{if(it.sc>=it.mk-1e-6)ok++;else if(it.sc>0)hf++;else wr++})));
+ let ok=0,hf=0,wr=0;const _sk=E.iskip||[],_qs=E.skip||[];E.qs.forEach((q,qi)=>{if(_qs.includes(qi))return;q.parts.forEach(p=>p.items.forEach(it=>{if(_sk.includes(it.id))return;if(it.sc>=it.mk-1e-6)ok++;else if(it.sc>0)hf++;else wr++}))});
  const ul=uLabel(E);
  return `<div class="res"><div class="ringw"><svg width="200" height="200"><circle cx="100" cy="100" r="86" fill="none" stroke="var(--line)" stroke-width="16"/><circle id="rg" cx="100" cy="100" r="86" fill="none" stroke="${c}" stroke-width="16" stroke-linecap="round" stroke-dasharray="540.4" stroke-dashoffset="540.4" style="transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)"/></svg><div class="v"><b style="color:${c}" id="rv">٠</b><small>من ١٠٠</small></div></div>
  <h2 style="color:${c}">${est(t)}</h2>
@@ -5509,18 +5540,34 @@ function offHead(p,en){
 }
 const QW=['الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع','العاشر'];
 function mkTxt(m){m=Math.round(m);return `${toAr(m)} ${m>10?'درجة':'درجات'}`}
-function pqHTML(E,q,qi){
+/* ورقة الأسئلة والإجابة بنفس الورقة: كل فقرة جوابها تحتها مباشرة */
+function itSkipped(E,id){return (E.iskip||[]).includes(id)}
+function npAns(E,it,R,qi,pi,p){
+ const en=E.en,v=E.ans[it.id],dis=R?'disabled':'',L=en?['a','b','c','d']:AL,sk=itSkipped(E,it.id);
+ if(sk&&!R)return `<div class="iskn">متروكة — ما تنحسب</div>`;
+ let inp='';
+ if(it.k==='mcq'){const ml=Math.max(...it.o.map(o=>String(o).replace(/<[^>]+>/g,'').length));
+  inp=`<div class="pmo ${ml>32?'c1':ml>14?'c2':''}">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`}
+ else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="tfb">${[['t',en?'True':'صح'],['f',en?'False':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[0]==='t'?'✓':'✗'}</i><span>${o[1]}</span></button>`).join('')}</div>`}
+ else if(R&&!String(v||'').trim())inp='';
+ else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa nl ${en?'ltr':''}" rows="2" data-id="${it.id}" ${R?'':`placeholder="${en?'Write your answer…':'اكتب الجواب هنا…'}"`} ${dis}>${esc(v||'')}</textarea>`;
+ else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="aa nl one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${R?'':`placeholder="${it.k==='calc'?'الناتج…':en?'Answer…':'الجواب…'}"`} ${dis}>`}
+ let fb='';
+ if(R){if(sk)return `<div class="iskn">متروكة</div>`;const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0,cls=ok?'ok':half?'half':'no';
+  fb=`<div class="xfb ${cls}"><div class="r1"><b>${ok?'صحيحة':half?'جزئية':v?'خاطئة':'لم تُجب'}</b><span>${toAr(+it.sc.toFixed(1))} / ${toAr(+it.mk.toFixed(1))}${it.self?' · تصحيح ذاتي':''}${it.ai?' · صُحّح بالمعنى':''}</span></div>${!ok&&!['mcq','tf'].includes(it.k)?`<div class="ma"><small>الإجابة النموذجية</small>${correctText(it)}</div>`:''}${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)} إبلاغ</button></div>`}
+ return inp+fb;
+}
+function pqHTML(E,q,qi,R){
  const en=E.en,one=q.parts.length===1;
  let h=`<div class="pq" id="pq${qi}" data-q="${qi}">`;
  q.parts.forEach((p,pi)=>{
   const lbl=one?'':`<b class="pl">${AL[pi]})</b> `;
-  h+=`<div class="pp"><div class="pph">${one?'':`<span class="pmk">(${mkTxt(p.marks)})</span>`}${lbl}<b>${offHead(p,en)}</b></div>`;
+  const nsk=p.items.filter(it=>itSkipped(E,it.id)).length,canSk=p.choose&&!R;
+  h+=`<div class="pp"><div class="pph">${one?'':`<span class="pmk">(${mkTxt(p.marks)})</span>`}${lbl}<b>${offHead(p,en)}</b>${canSk?`<div class="chn">جاوب على ${NUMW2[p.choose]||toAr(p.choose)} بس — الفقرة اللي ما تريدها اضغط «اترك» عليها</div>`:''}</div>`;
   if(p.k==='psg')h+=`<div class="ppsg">${ulz(p.text)}</div>`;
-  if(INL.includes(p.k)&&!en)h+=`<div class="pil">${p.items.map((it,i)=>`<span id="pi_${it.id}">${toAr(i+1)}) ${ulz(stripWz(it.q))}</span>`).join('، ')}</div>`;
-  else h+=p.items.map((it,i)=>{
-   let x='';if(it.k==='mcq'){const ml=Math.max(...it.o.map(o=>String(o).replace(/<[^>]+>/g,'').length));x=`<div class="pmo ${ml>32?'c1':ml>14?'c2':''}">${it.o.map((o,j)=>`<span><b>${(en?['a','b','c','d']:AL)[j]})</b> ${o}</span>`).join('')}</div>`}
-   const tf=it.k==='tf'?`<span class="tfm">(&nbsp; ........... &nbsp;)</span>`:'';
-   return `<div class="pit ${it.k==='tf'?'tf':''}" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'.'}</span><div class="px">${ulz(stripWz(it.q))}${x}</div>${tf}</div>`}).join('');
+  h+=p.items.map((it,i)=>{const sk=itSkipped(E,it.id);
+   const skb=canSk?`<button class="iskb ${sk?'on':''}" onclick="toggleISkip(${qi},${pi},'${it.id}')">${sk?'↩ رجّعها':'اترك'}</button>`:'';
+   return `<div class="pit wa ${sk?'iskd':''}" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'.'}</span><div class="px"><div class="pqt"><span class="pqx">${ulz(stripWz(it.q))}</span>${skb}</div>${npAns(E,it,R,qi,pi,p)}</div></div>`}).join('');
   h+=`</div>`;
  });
  return h+`</div>`;
@@ -5533,33 +5580,20 @@ function offV(E,R,g,wiz,ul){
  const kind=E.quiz?'اختبار ذاتي':wiz?'وزاري':E.type==='h'?'نصف السنة':E.type==='m'?'شهري':'نهاية السنة';
  const tot=E.qs.reduce((t,q)=>t+q.marks,0),best=E.best?E.qs.slice(0,E.best).reduce((t,q)=>t+q.marks,0):tot;
  const note=E.quiz?'أجب عن جميع الأسئلة':E.best?`أجب عن ${NUMW2[E.best]||toAr(E.best)} أسئلة فقط ولكل سؤال (${mkTxt(E.qs[0].marks)})`:'أجب عن جميع الأسئلة بحسب المطلوب';
- let h=`<div class="op np"><i class="sw1"></i><i class="sw2"></i>
+ let h=`<div class="op np npa"><i class="sw1"></i><i class="sw2"></i>
  <div class="nph"><div class="npl">${logoHTML()}</div><div class="npc"><div class="npn">منصة ${nm} التعليمية</div><div class="npr"><i></i><span>${ttl}</span><i></i></div></div><div class="nps">مع ${nm} ..<br>نحقق التفوق</div></div>
  <div class="npi"><div><p><b>المدرسة :</b> <i class="d"></i></p><p><b>المادة :</b> ${esc(sub)}</p><p><b>الصف :</b> ${esc(g.n)}</p></div>
  <div><p><b>نوع الامتحان :</b> ${kind}</p><p><b>التاريخ :</b> ${arDate()}</p><p><b>المدة :</b> ${dur}</p></div>
  <div><p><b>اسم الطالب :</b> ${U.name?`<span class="npsn">${esc(U.name)}</span>`:'<i class="d"></i>'}</p><p><b>رقم الامتحان :</b> <i class="d"></i></p></div></div>
  <div class="npb">${note}</div>`;
  E.qs.forEach((q,qi)=>{const skd=(E.skip||[]).includes(qi);
-  h+=`<div class="nq ${skd?'skd':''}"><div class="nqh"><span class="nqt">${E.quiz?'السؤال '+toAr(qi+1):'السؤال '+(QW[qi]||toAr(qi+1))} :</span><i></i><span class="nqm">( ${mkTxt(q.marks)} )</span></div><div class="nqb">${pqHTML(E,q,qi)}</div></div>`});
+  const res=R?`<span class="nqr" style="color:${scoreCol(q.sc/q.marks*100)}">${skd?'متروك':`${toAr(+q.sc.toFixed(1))}/${toAr(Math.round(q.marks))}${E.drop&&E.drop.includes(qi)?' · غير محتسب':''}`}</span>`:'';
+  h+=`<div class="nq ${skd?'skd':''}" id="qc${qi}" data-q="${qi}"><div class="nqh"><span class="nqt">${E.quiz?'السؤال '+toAr(qi+1):'السؤال '+(QW[qi]||toAr(qi+1))} :</span><i></i><span class="nqm">( ${mkTxt(q.marks)} )</span>${res}</div>
+  ${E.best&&!R?`<button class="skipb ${skd?'on':''}" onclick="toggleSkip(${qi})">${skd?'✓ تركت هذا السؤال — اضغط للتراجع':'اترك هذا السؤال'}</button>`:''}
+  <div class="nqb">${skd&&!R?`<div class="skn">هذا السؤال متروك ولا يُحتسب. تجاوب على ${toAr(E.best)} أسئلة فقط.</div>`:pqHTML(E,q,qi,R)}</div></div>`});
  const sc=R&&E.total!=null?`<div class="nfs">درجتك: <b>${toAr(Math.round(E.total))}</b></div>`:'';
  h+=`<div class="npf"><div class="nfa"><span><b>اسم المصحح :</b> <i class="d"></i></span><span><b>التوقيع :</b> <i class="d s"></i></span></div><div class="nft">الدرجة الكلية : <b>( ${toAr(Math.round(best))} )</b> درجة${sc}</div></div>
  <div class="npe">انتهت الأسئلة — مع تمنياتنا لكم بالنجاح والتفوق</div>${X.wm?`<div class="opw">${esc(X.wm)}</div>`:''}</div>`;
- h+=`<button class="gotoans" onclick="document.getElementById('asheet').scrollIntoView({behavior:'smooth'})">${I('edit',18)} ابدأ الإجابة</button>`;
- // ورقة الإجابة + المعاينة المتحركة
- h+=`<div class="as" id="asheet"><div class="pv" id="pv"><div class="pvh" onclick="togglePv()"><span>${I('eye',16)} السؤال: <b id="pvt">${QN[0]}</b></span><span class="pvx" id="pvx">إخفاء ▴</span></div><div class="pvb" id="pvb"></div></div>
- <div class="ash">ورقة الإجابة</div>`;
- E.qs.forEach((q,qi)=>{
-  const qm=toAr(Math.round(q.marks));
-  const skd=(E.skip||[]).includes(qi);
-  h+=`<section class="aq ${skd?'skd':''}" id="qc${qi}" data-q="${qi}"><div class="aqh"><b>جواب ${E.quiz?'س'+toAr(qi+1):QN[qi]}/</b>${R?`<span class="red" style="color:${scoreCol(q.sc/q.marks*100)}">${skd?'متروك':`${toAr(+q.sc.toFixed(1))}/${qm}${E.drop&&E.drop.includes(qi)?' · غير محتسب':''}`}</span>`:`<span>${qm} درجة</span>`}</div>
-  ${E.best&&!R?`<button class="skipb ${skd?'on':''}" onclick="toggleSkip(${qi})">${skd?'✓ تركت هذا السؤال — اضغط للتراجع':'اترك هذا السؤال'}</button>`:''}`;
-  if(skd&&!R){h+=`<div class="skn">هذا السؤال متروك ولا يُحتسب. تجاوب على ${toAr(E.best)} أسئلة فقط.</div></section>`;return}
-  q.parts.forEach((p,pi)=>{
-   h+=`<div class="ap">${q.parts.length>1?`<div class="aph"><b>${AL[pi]})</b>${p.choose?`<span class="ch">أجب عن ${NUMW2[p.choose]} فقط</span>`:''}</div>`:p.choose?`<div class="aph"><span class="ch">أجب عن ${NUMW2[p.choose]} فقط</span></div>`:''}`;
-   p.items.forEach((it,i)=>{h+=ansItem(E,it,i,R)});
-   h+=`</div>`});
-  h+=`</section>`});
- h+=`</div>`;
  return h;
 }
 function ansItem(E,it,i,R){
@@ -5568,6 +5602,7 @@ function ansItem(E,it,i,R){
  const qq=stripWz(it.q);const lab=it.k==='mcq'||it.k==='tf'?'':`<div class="alab">${ulz(qq.length>70?qq.slice(0,70)+'…':qq)}</div>`;
  if(it.k==='mcq')inp=`<div class="abub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="abub">${[['t',en?'T':'صح'],['f',en?'F':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[1]}</i></button>`).join('')}</div>`}
+ else if(R&&!String(v||'').trim())inp='';
  else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa" rows="2" data-id="${it.id}" placeholder="${en?'Answer…':'الجواب…'}" ${dis}>${v||''}</textarea>`;
  else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="aa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':en?'Answer':'الجواب'}" ${dis}>`}
  let fb='';
@@ -5599,6 +5634,15 @@ function toggleSkip(qi){const E=V.exam;E.skip=E.skip||[];const max=E.qs.length-E
  if(E.skip.includes(qi))E.skip=E.skip.filter(x=>x!==qi);
  else{if(E.skip.length>=max){if(max===1)E.skip=[qi];else return toast(`تگدر تترك ${toAr(max)} أسئلة بس`)}else E.skip.push(qi)}
  const y=scrollY;render();scrollTo(0,y)}
+
+function toggleISkip(qi,pi,id){const E=V.exam;E.iskip=E.iskip||[];const p=E.qs[qi].parts[pi];const max=p.items.length-p.choose;
+ if(E.iskip.includes(id))E.iskip=E.iskip.filter(x=>x!==id);
+ else{const mine=p.items.filter(it=>E.iskip.includes(it.id)).map(it=>it.id);
+  if(mine.length>=max){if(max===1)E.iskip=E.iskip.filter(x=>!mine.includes(x));else return toast(`تگدر تترك ${toAr(max)} فقرات بس`)}
+  E.iskip.push(id);delete E.ans[id]}
+ const y=scrollY;render();scrollTo(0,y)}
+function npInit(){lockZoom(true);vvFix();const eb=document.querySelector('.ebar');if(eb)document.documentElement.style.setProperty('--ebh',eb.offsetHeight+'px');
+ document.querySelectorAll('.np textarea.nl').forEach(t=>{t.style.height='auto';t.style.height=Math.max(68,t.scrollHeight+2)+'px'})}
 /* ---------- تشغيل ---------- */
 function bootRoute(){if(location.hash==='#admin'){V.scr='admin'}}
 window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin')});
