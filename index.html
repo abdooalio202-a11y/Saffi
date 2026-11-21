@@ -756,6 +756,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .inp.num.own{border-color:var(--brand);background:var(--brandSoft)}
 .hintb{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font:600 12px "IBM Plex Sans Arabic",sans-serif;color:#9a6700;background:#fff7d6;border:1px solid #f5d77a;border-radius:999px;padding:2px 10px;margin-inline-start:8px;white-space:nowrap;vertical-align:middle}
 .hintbox{display:flex;gap:6px;align-items:flex-start;margin:6px 0 2px;padding:7px 10px;border-radius:12px;background:#fff7d6;border:1px dashed #f0c94a;color:#6b4e00;font:500 13.5px/1.8 "IBM Plex Sans Arabic",sans-serif}
+.hintbox .hx{font-weight:700;color:#4a3500}.hintbox small{color:#8a6a10}
 .opt.gone{opacity:.35;text-decoration:line-through;pointer-events:none}
 .hgq{background:var(--bg2,#f6f7fb);border-radius:16px;padding:12px;margin:10px 0}.hgq b{display:block;line-height:1.8;margin-bottom:8px}.hgq small{display:block;color:var(--ink3);margin:-4px 0 6px}
 .hgq .xo{display:grid;gap:8px}.hgq .xo.two{grid-template-columns:1fr 1fr}
@@ -5056,7 +5057,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٢/١١ (٥)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٢/١١ (٦)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5806,25 +5807,32 @@ const HN=s=>String(s==null?'':s).replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'�
 function hintTopic(it){const us=unitsFor(EGK(V.exam),V.exam.sub)||[];const key=HN(stripWz(it.fam||it.q||''));
  for(const u of us)for(const l of (u.ls||[])){if((l.q||[]).some(x=>HN(stripWz(x.fam||x.q||x.text||''))===key))return `هذا السؤال من موضوع «${esc(l.n)}» — ${esc(u.n)}`}
  return null}
+/* جزء من الجواب: أول نقطة إذا الجواب نقاط، وإلا تقريباً نص الجواب الأول */
+function partAns(m,frac){m=String(m||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();if(!m)return '';
+ const pts=m.split(/\s*(?:^|\s)(?:[0-9٠-٩]+|[أ-ي])\s*[-–)]\s+/).map(x=>x.trim()).filter(Boolean);
+ if(pts.length>=3){const head=m.match(/^[^0-9٠-٩]*?(?=(?:[0-9٠-٩]+)\s*[-–)])/);const intro=head&&head[0].trim()?head[0].trim()+' ':'';
+  return {txt:intro+'١- '+pts[intro?1:0]+' …',more:pts.length-(intro?2:1)}}
+ const w=m.split(' ');if(w.length===1)return {txt:maskWord(w[0]),more:0};if(w.length===2)return {txt:w[0]+' …',more:0};
+ const n=Math.max(2,Math.min(w.length-2,Math.ceil(w.length*(frac||.45))));return {txt:w.slice(0,n).join(' ')+' …',more:0}}
+function maskWord(x){const c=[...x];const keep=/^ال/.test(x)&&c.length>3?Math.max(3,Math.ceil(c.length/2)):Math.ceil(c.length/2);return c.slice(0,keep).join('')+'ـ'.repeat(0)+' '+'_ '.repeat(c.length-keep).trim()}
 function makeHint(it){const E=V.exam,en=E.en;
  const ar=(n)=>en?String(n):toAr(n);
  if(it.k==='mcq'&&it.o){const wrong=it.o.map((_,j)=>j).filter(j=>j!==it.a);const n=it.o.length>=4?2:1;const rm=shuffle(wrong).slice(0,n);
   return {rm,t:en?`We removed ${n===2?'two wrong options':'one wrong option'}.`:`شلنا ${n===2?'اختيارين غلط':'اختيار غلط'} — اختار من الباقي.`}}
- if(it.k==='blank'||it.k==='ext'){let a=Array.isArray(it.a)?it.a[0]:it.a;if(Array.isArray(a))a=a[0];a=String(a||'').trim();
-  a=a.replace(/[()«»"',.،]/g,' ').replace(/\s+/g,' ').trim();const w=a.split(/\s+/);if(!a)return {t:hintTopic(it)||'فكّر بالكلمة اللي تكمّل المعنى.'};
-  const st=x=>/^ال./.test(x)&&x.length>3?x.slice(0,3):x[0];const cnt=n=>n===2?'كلمتين':ar(n)+' كلمات';
-  return {t:w.length>1?`الجواب ${cnt(w.length)}، تبدأ بـ: ${w.map(x=>'«'+st(x)+'…»').join(' ، ')}`:`الجواب كلمة تبدأ بـ«${st(a)}…» وعدد حروفها ${ar(a.replace(/[ً-ْ]/g,'').length)}`}}
- if(it.k==='calc'){const v=+it.ans;if(isFinite(v)){const s=String(Math.abs(v));const int=s.split('.')[0];
-   return {t:`الناتج ${v<0?'سالب':v===0?'صفر':'موجب'}${v!==0?`، والجزء الصحيح منه يتكون من ${ar(int.length)} ${int.length>1?'مراتب':'مرتبة'}`:''}${s.includes('.')?'، وبي كسر عشري':''}.`}}
+ if(it.k==='blank'||it.k==='ext'){let a=Array.isArray(it.a)?it.a[0]:it.a;if(Array.isArray(a))a=a[0];a=String(a||'').replace(/[()«»"',.،]/g,' ').replace(/\s+/g,' ').trim();
+  if(!a)return {t:hintTopic(it)||'فكّر بالكلمة اللي تكمّل المعنى.'};const w=a.split(' ');
+  if(w.length===1)return {t:`الجواب: <b class="hx">${esc(maskWord(a))}</b>`};
+  return {t:`الجواب: <b class="hx">${esc(w[0])} ${w.slice(1).map(maskWord).map(esc).join(' ')}</b>`}}
+ if(it.k==='calc'){const m=String(it.m||'');const v=+it.ans;
+  if(/=/.test(m)&&!/^الناتج/.test(m.trim())){const i=m.lastIndexOf('=');return {t:`طريقة الحل: <b class="hx">${esc(m.slice(0,i+1))} ؟</b>`}}
+  if(isFinite(v)){const s=String(Math.abs(v));const shown=s.length>1?s.slice(0,Math.ceil(s.length/2)):'';
+   return {t:shown?`الناتج يبدأ بـ <b class="hx">${v<0?'-':''}${ar(shown)}…</b> وعدد مراتبه ${ar(s.replace('.','').length)}`:(()=>{const lo=Math.floor(v)-2,hi=Math.floor(v)+2;return `الناتج عدد بين <b class="hx">${ar(lo)}</b> و <b class="hx">${ar(hi)}</b>`})()}}
   return {t:hintTopic(it)||'ركّز على القانون وعوّض بالأرقام خطوة خطوة.'}}
- if(it.k==='irab'&&it.m){const w=String(it.m).split(/\s+/).slice(0,2).join(' ');return {t:`الإعراب يبدأ بـ: «${esc(w)} …»`}}
- if(it.k==='tf'){return {t:(hintTopic(it)||'اقرا الجملة كلمة كلمة')+'. انتبه للكلمة اللي ممكن تكون متغيّرة: الأرقام، الأسماء، والكلمات مثل «دائماً» و«فقط».'}}
- if(Array.isArray(it.a)&&it.a.length&&Array.isArray(it.a[0])){const g=it.a.map(x=>x[0]).filter(Boolean);
-  const orig=k=>{const kw=HN(k).split(' ');const ws=String(it.m||'').replace(/[،,.؛:()«»]/g,' ').split(/\s+/).filter(Boolean);
-   for(let i=0;i+kw.length<=ws.length;i++){const seg=ws.slice(i,i+kw.length);if(HN(seg.join(' ')).replace(/^(و|ب|ل|ف)?ال/,'')===HN(k).replace(/^(و|ب|ل|ف)?ال/,'')||HN(seg.join(' '))===HN(k))return seg.join(' ')}
-   for(const x of ws){if(HN(x).includes(HN(k)))return x}return k};
-  const first=g[0],n=g.length,cnt=n===2?'فكرتين':ar(n)+' أفكار';const fw=first?String(orig(first)).split(/\s+/):[];const show=fw.length?esc(fw[0])+(fw.length>1?' …':''):'';
-  return {t:n===1?(show?`الجواب يدور حول: «${show}»`:'فكّر بالفكرة الرئيسة.'):`الجواب بيه ${cnt}${show?`، وحدة منها تدور حول: «${show}»`:''}.`}}
+ if(it.k==='tf'){const term=stripWz(it.fam||'');const us=unitsFor(EGK(E),E.sub)||[];let def=null;
+  if(term){outer:for(const u of us)for(const l of (u.ls||[]))for(const x of (l.q||[])){if(x.k==='def'&&x.m&&HN(stripWz(x.q))===HN(term)){def=x.m;break outer}}}
+  if(def){const p=partAns(def,.6);return {t:`تذكّر: «${esc(term)}» هو: <b class="hx">${esc(p.txt)}</b>`}}
+  return {t:(hintTopic(it)||'اقرا الجملة كلمة كلمة')+'. انتبه للكلمة اللي ممكن تكون متغيّرة: الأرقام، الأسماء، والكلمات مثل «دائماً» و«فقط».'}}
+ if(it.m){const p=partAns(it.m,it.k==='irab'?.5:.45);if(p&&p.txt)return {t:`بداية الجواب: <b class="hx">${esc(p.txt)}</b>${p.more>0?` <small>(وباقي ${ar(p.more)} ${p.more>2?'نقاط':p.more===2?'نقطتين':'نقطة'})</small>`:''}`}}
  return {t:hintTopic(it)||'ارجع لتعريف الموضوع بالكتاب وفكّر بالكلمات المفتاحية.'};
 }
 function hintGateQ(){const E=V.exam;const gk=EGK(E),g=GR[gk];
