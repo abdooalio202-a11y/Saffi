@@ -754,6 +754,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .fullbtn .play{margin-inline-start:auto;width:38px;height:38px;border-radius:50%;background:#fff;color:#2563eb;display:grid;place-items:center}
 .exbox{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:10px}.exbox>b{display:block;margin-bottom:4px;font-size:14.5px}
 .inp.num.own{border-color:var(--brand);background:var(--brandSoft)}
+.hintb{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:3px;font:600 12px "IBM Plex Sans Arabic",sans-serif;color:#9a6700;background:#fff7d6;border:1px solid #f5d77a;border-radius:999px;padding:2px 10px;margin-inline-start:8px;white-space:nowrap;vertical-align:middle}
+.hintbox{display:flex;gap:6px;align-items:flex-start;margin:6px 0 2px;padding:7px 10px;border-radius:12px;background:#fff7d6;border:1px dashed #f0c94a;color:#6b4e00;font:500 13.5px/1.8 "IBM Plex Sans Arabic",sans-serif}
+.opt.gone{opacity:.35;text-decoration:line-through;pointer-events:none}
+.hgq{background:var(--bg2,#f6f7fb);border-radius:16px;padding:12px;margin:10px 0}.hgq b{display:block;line-height:1.8;margin-bottom:8px}.hgq small{display:block;color:var(--ink3);margin:-4px 0 6px}
+.hgq .xo{display:grid;gap:8px}.hgq .xo.two{grid-template-columns:1fr 1fr}
+.hgq .opt{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:14.5px}
+.hgq .opt i{font-style:normal;width:24px;height:24px;border-radius:50%;border:1.5px solid #888;display:grid;place-items:center;font-size:12px;font-weight:700;flex:0 0 auto}
+.hgbad{background:#fde8e8;color:#b42318;border-radius:12px;padding:8px 10px;font-size:13.5px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -4089,7 +4097,7 @@ function buildExam(gk,sub,type,unit){
  const take=(k,n)=>{const out=[],arr=byK[k];for(let i=0;i<arr.length&&out.length<n;){const x=arr[i],f=x.gen?null:sigOf(x);if(f&&famU.has(f)){i++;continue}arr.splice(i,1);if(f)famU.add(f);out.push(x)}
   if(out.length<Math.min(2,n)&&famLow){const qs0=new Set(out.map(x=>x.q));for(let i=0;i<arr.length&&out.length<n;){const x=arr[i];if(qs0.has(x.q)){i++;continue}arr.splice(i,1);out.push(x)}}return out};
  for(let si=0;si<slots;si++){
-  const pi=si%nP;if(pi===0)tk=new Set();const pref=(SL[pi]||SL[SL.length-1]).slice().sort((a,c)=>(rot[a]||0)-(rot[c]||0));
+  const pi=si%nP;if(pi===0)tk=new Set();const pref=(nP===1?shuffle([...new Set(SL.flat())]):(SL[pi]||SL[SL.length-1]).slice()).sort((a,c)=>(rot[a]||0)-(rot[c]||0));
   let k=pref.find(x=>byK[x]&&byK[x].length&&!tk.has(x));
   if(!k)k=Object.keys(byK).sort((a,c)=>(rot[a]||0)-(rot[c]||0)).find(x=>byK[x].length&&!tk.has(x));
   if(!k)k=Object.keys(byK).find(x=>byK[x].length);
@@ -4905,14 +4913,14 @@ const intr=x=>toAr(Math.round(x));
 function xItem(it,i,en,R){
  const v=V.exam.ans[it.id],dis=R?'disabled':'';let a='';
  const L=en?['a','b','c','d']:AL;
- if(it.k==='mcq')a=`<div class="xo">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`;
+ if(it.k==='mcq')a=`<div class="xo">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''} ${!R&&hintRm(it,j)?'gone':''}" data-id="${it.id}" data-v="${j}" ${dis||(hintRm(it,j)?'disabled':'')}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';a=`<div class="xo two">${[['t',en?'True':'صح','✓'],['f',en?'False':'خطأ','✗']].map(o=>`<button class="opt ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[2]}</i><span>${o[1]}</span></button>`).join('')}</div>`}
  else if(['def','why','fn','diff','irab','fix','tr','loc'].includes(it.k))a=`<textarea class="xa" rows="2" data-id="${it.id}" placeholder="${en?'Write your answer…':'اكتب إجابتك…'}" ${dis}>${v||''}</textarea>`;
  else{const ltr=it.k==='dna'||en||it.l;a=`<input class="xa one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" placeholder="${it.k==='calc'?'الناتج':it.k==='dna'?'AUG …':en?'Answer':'الإجابة'}" ${dis}>`}
  let fb='';
  if(R){const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0,cls=ok?'ok':half?'half':'no';
   fb=`<div class="xfb ${cls}"><div class="r1"><b>${ok?'إجابة صحيحة':half?'إجابة جزئية':v?'إجابة خاطئة':'لم تُجب'}</b><span>${toAr(+it.sc.toFixed(1))} / ${toAr(+it.mk.toFixed(1))}${it.self?' · تصحيح ذاتي':''}${it.ai?' · صُحّح بالمعنى':''}</span></div>${!ok&&!['mcq','tf'].includes(it.k)?`<div class="ma"><small>الإجابة النموذجية</small>${correctText(it)}</div>`:''}${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)} إبلاغ</button></div>`}
- return `<div class="xi ${en?'ltr':''}"><span class="xn">${en?i+1:toAr(i+1)}</span><div class="xb"><div class="xq">${ulz(it.q||'')}${V.exam.quiz&&it.wz?' <span class="wz">وزاري</span>':''}</div>${a}${fb}</div></div>`;
+ return `<div class="xi ${en?'ltr':''}"><span class="xn">${en?i+1:toAr(i+1)}</span><div class="xb" data-hid="${it.id}"><div class="xq">${ulz(it.q||'')}${V.exam.quiz&&it.wz?' <span class="wz">وزاري</span>':''}${hintBtn(it,R)}</div>${hintBox(it)}${a}${fb}</div></div>`;
 }
 function sheetV(E,R,g,wiz,ul){
  const sub=SUB[E.sub].n,en=E.en,m=SUB[E.sub];
@@ -5048,7 +5056,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٠/١١ (٣)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٢/١١ (٥)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5314,9 +5322,10 @@ function adExam(){const X=ADM.cfg.exam,gk=V.ad.xg||'',g=gk?GR[gk]:null;
  <p class="muted2" style="margin-top:6px">${gk?`هذي الإعدادات لـ<b>${GR[gk].n}</b> بس. الخانة الملوّنة غيّرتها لهذا الصف، والباقي ياخذ من الإعداد الأساسي.`:'هذا الإعداد يمشي على كل الصفوف، إلا الصف اللي تغيّر إعداداته لحاله (اختاره من القائمة).'}</p>
  ${keys.map(([k,n])=>`<div class="exbox"><b>${n}</b>
   <div class="adkv"><span>عدد الأسئلة</span>${num(k,'nQ',1,10)}</div>
-  <div class="adkv"><span>عدد الفروع بكل سؤال (أ، ب، ج)</span>${num(k,'nP',1,4)}</div>
-  <div class="adkv"><span>أقل عدد نقاط بالفرع</span>${num(k,'minI',1,8)}</div>
-  <div class="adkv"><span>أكثر عدد نقاط بالفرع</span>${num(k,'maxI',1,10)}</div>
+  <label class="ck" style="margin:6px 0"><input type="checkbox" ${eff(k).nP>1?'checked':''} onchange="admSetXG('${k}','nP',this.checked?2:1)"><span>السؤال متفرع (أ، ب، ج)</span></label>
+  ${eff(k).nP>1?`<div class="adkv"><span>عدد الفروع بكل سؤال</span>${num(k,'nP',2,4)}</div>`:''}
+  <div class="adkv"><span>${eff(k).nP>1?'أقل عدد نقاط بالفرع':'أقل عدد نقاط بالسؤال'}</span>${num(k,'minI',1,10)}</div>
+  <div class="adkv"><span>${eff(k).nP>1?'أكثر عدد نقاط بالفرع':'أكثر عدد نقاط بالسؤال'}</span>${num(k,'maxI',1,12)}</div>
   ${k==='f'?`<div class="adkv"><span>يُحسب أفضل … أسئلة</span>${num(k,'best',1,10)}</div>`:''}
   ${k==='c'?`<div class="adkv"><span>المدة (دقيقة)</span>${num(k,'dur',10,240)}</div>`:''}</div>`).join('')}
  ${gk&&X.byG[gk]?`<button class="btns" style="margin-top:8px" onclick="delete ADM.cfg.exam.byG['${gk}'];admSave()">رجّع ${GR[gk].n} للإعداد الأساسي</button>`:''}
@@ -5613,7 +5622,7 @@ function npAns(E,it,R,qi,pi,p){
  if(sk&&!R)return `<div class="iskn">متروكة — ما تنحسب</div>`;
  let inp='';
  if(it.k==='mcq'){const ml=Math.max(...it.o.map(o=>String(o).replace(/<[^>]+>/g,'').length));
-  inp=`<div class="pmo ${ml>32?'c1':ml>14?'c2':''}">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`}
+  inp=`<div class="pmo ${ml>32?'c1':ml>14?'c2':''}">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''} ${!R&&hintRm(it,j)?'gone':''}" data-id="${it.id}" data-v="${j}" ${dis||(hintRm(it,j)?'disabled':'')}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`}
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="tfb">${[['t',en?'True':'صح'],['f',en?'False':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[0]==='t'?'✓':'✗'}</i><span>${o[1]}</span></button>`).join('')}</div>`}
  else if(R&&!String(v||'').trim())inp='';
  else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa nl ${en?'ltr':''}" rows="2" data-id="${it.id}" ${R?'':`placeholder="${en?'Write your answer…':'اكتب الجواب هنا…'}"`} ${dis}>${esc(v||'')}</textarea>`;
@@ -5633,7 +5642,7 @@ function pqHTML(E,q,qi,R){
   if(p.k==='psg')h+=`<div class="ppsg">${ulz(p.text)}</div>`;
   h+=p.items.map((it,i)=>{const sk=itSkipped(E,it.id);
    const skb=canSk?`<button class="iskb ${sk?'on':''}" onclick="toggleISkip(${qi},${pi},'${it.id}')">${sk?'↩ رجّعها':'اترك'}</button>`:'';
-   return `<div class="pit wa ${sk?'iskd':''}" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'.'}</span><div class="px"><div class="pqt"><span class="pqx">${ulz(stripWz(it.q))}</span>${skb}</div>${npAns(E,it,R,qi,pi,p)}</div></div>`}).join('');
+   return `<div class="pit wa ${sk?'iskd':''}" id="pi_${it.id}"><span class="pn">${en?(i+1)+'.':toAr(i+1)+'.'}</span><div class="px"><div class="pqt"><span class="pqx">${ulz(stripWz(it.q))}</span>${skb}${sk?'':hintBtn(it,R)}</div>${sk?'':hintBox(it)}${npAns(E,it,R,qi,pi,p)}</div></div>`}).join('');
   h+=`</div>`;
  });
  return h+`</div>`;
@@ -5666,7 +5675,7 @@ function ansItem(E,it,i,R){
  const en=E.en,v=E.ans[it.id],dis=R?'disabled':'';let inp='';
  const L=en?['a','b','c','d']:AL;
  const qq=stripWz(it.q);const lab=it.k==='mcq'||it.k==='tf'?'':`<div class="alab">${ulz(qq.length>70?qq.slice(0,70)+'…':qq)}</div>`;
- if(it.k==='mcq')inp=`<div class="abub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''}" data-id="${it.id}" data-v="${j}" ${dis}><i>${L[j]}</i></button>`).join('')}</div>`;
+ if(it.k==='mcq')inp=`<div class="abub">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''} ${!R&&hintRm(it,j)?'gone':''}" data-id="${it.id}" data-v="${j}" ${dis||(hintRm(it,j)?'disabled':'')}><i>${L[j]}</i></button>`).join('')}</div>`;
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="abub">${[['t',en?'T':'صح'],['f',en?'F':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[1]}</i></button>`).join('')}</div>`}
  else if(R&&!String(v||'').trim())inp='';
  else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa" rows="2" data-id="${it.id}" placeholder="${en?'Answer…':'الجواب…'}" ${dis}>${v||''}</textarea>`;
@@ -5788,6 +5797,60 @@ async function doShareImg(){const s=V.shareImg;if(!s)return;
  try{if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'نتيجتي',text:`نتيجتي بمنصة ${u.name} التعليمية: ${toAr(V.exam.total)}/١٠٠ — ${location.origin}`});
   else await navigator.share({title:'نتيجتي',text:`نتيجتي بمنصة ${u.name} التعليمية: ${toAr(V.exam.total)}/١٠٠`,url:location.origin})}
  catch(e){if(e&&e.name!=='AbortError')toast('المشاركة ما اشتغلت، احفظ الصورة')}}
+
+/* =====================================================================
+   التلميح: الطالب يجاوب سؤال سهل من نفس المادة، وإذا صح ينفتح تلميح السؤال
+   ===================================================================== */
+const EGK=E=>typeof E.g==='string'?E.g:(E.g&&E.g.k)||U.grade;
+const HN=s=>String(s==null?'':s).replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/\s+/g,' ').trim();
+function hintTopic(it){const us=unitsFor(EGK(V.exam),V.exam.sub)||[];const key=HN(stripWz(it.fam||it.q||''));
+ for(const u of us)for(const l of (u.ls||[])){if((l.q||[]).some(x=>HN(stripWz(x.fam||x.q||x.text||''))===key))return `هذا السؤال من موضوع «${esc(l.n)}» — ${esc(u.n)}`}
+ return null}
+function makeHint(it){const E=V.exam,en=E.en;
+ const ar=(n)=>en?String(n):toAr(n);
+ if(it.k==='mcq'&&it.o){const wrong=it.o.map((_,j)=>j).filter(j=>j!==it.a);const n=it.o.length>=4?2:1;const rm=shuffle(wrong).slice(0,n);
+  return {rm,t:en?`We removed ${n===2?'two wrong options':'one wrong option'}.`:`شلنا ${n===2?'اختيارين غلط':'اختيار غلط'} — اختار من الباقي.`}}
+ if(it.k==='blank'||it.k==='ext'){let a=Array.isArray(it.a)?it.a[0]:it.a;if(Array.isArray(a))a=a[0];a=String(a||'').trim();
+  a=a.replace(/[()«»"',.،]/g,' ').replace(/\s+/g,' ').trim();const w=a.split(/\s+/);if(!a)return {t:hintTopic(it)||'فكّر بالكلمة اللي تكمّل المعنى.'};
+  const st=x=>/^ال./.test(x)&&x.length>3?x.slice(0,3):x[0];const cnt=n=>n===2?'كلمتين':ar(n)+' كلمات';
+  return {t:w.length>1?`الجواب ${cnt(w.length)}، تبدأ بـ: ${w.map(x=>'«'+st(x)+'…»').join(' ، ')}`:`الجواب كلمة تبدأ بـ«${st(a)}…» وعدد حروفها ${ar(a.replace(/[ً-ْ]/g,'').length)}`}}
+ if(it.k==='calc'){const v=+it.ans;if(isFinite(v)){const s=String(Math.abs(v));const int=s.split('.')[0];
+   return {t:`الناتج ${v<0?'سالب':v===0?'صفر':'موجب'}${v!==0?`، والجزء الصحيح منه يتكون من ${ar(int.length)} ${int.length>1?'مراتب':'مرتبة'}`:''}${s.includes('.')?'، وبي كسر عشري':''}.`}}
+  return {t:hintTopic(it)||'ركّز على القانون وعوّض بالأرقام خطوة خطوة.'}}
+ if(it.k==='irab'&&it.m){const w=String(it.m).split(/\s+/).slice(0,2).join(' ');return {t:`الإعراب يبدأ بـ: «${esc(w)} …»`}}
+ if(it.k==='tf'){return {t:(hintTopic(it)||'اقرا الجملة كلمة كلمة')+'. انتبه للكلمة اللي ممكن تكون متغيّرة: الأرقام، الأسماء، والكلمات مثل «دائماً» و«فقط».'}}
+ if(Array.isArray(it.a)&&it.a.length&&Array.isArray(it.a[0])){const g=it.a.map(x=>x[0]).filter(Boolean);
+  const orig=k=>{const kw=HN(k).split(' ');const ws=String(it.m||'').replace(/[،,.؛:()«»]/g,' ').split(/\s+/).filter(Boolean);
+   for(let i=0;i+kw.length<=ws.length;i++){const seg=ws.slice(i,i+kw.length);if(HN(seg.join(' ')).replace(/^(و|ب|ل|ف)?ال/,'')===HN(k).replace(/^(و|ب|ل|ف)?ال/,'')||HN(seg.join(' '))===HN(k))return seg.join(' ')}
+   for(const x of ws){if(HN(x).includes(HN(k)))return x}return k};
+  const first=g[0],n=g.length,cnt=n===2?'فكرتين':ar(n)+' أفكار';const fw=first?String(orig(first)).split(/\s+/):[];const show=fw.length?esc(fw[0])+(fw.length>1?' …':''):'';
+  return {t:n===1?(show?`الجواب يدور حول: «${show}»`:'فكّر بالفكرة الرئيسة.'):`الجواب بيه ${cnt}${show?`، وحدة منها تدور حول: «${show}»`:''}.`}}
+ return {t:hintTopic(it)||'ارجع لتعريف الموضوع بالكتاب وفكّر بالكلمات المفتاحية.'};
+}
+function hintGateQ(){const E=V.exam;const gk=EGK(E),g=GR[gk];
+ const inEx=new Set(E.qs.flatMap(q=>q.parts.flatMap(p=>p.items.map(x=>HN(stripWz(x.fam||x.q||''))))));
+ const pool=(poolFor(gk,E.sub,-1)||[]).filter(x=>(x.k==='mcq'&&x.o&&x.o.length>=3||x.k==='tf')&&x.q&&!inEx.has(HN(stripWz(x.fam||x.q))));
+ if(!pool.length)return null;const orig=pool.filter(x=>!x.der);const src=orig.length>=5?orig:pool;const r=src[Math.floor(Math.random()*src.length)];
+ try{const it=makeItem(E.sub,g.b,Object.assign({},r));if(it.k==='mcq'&&it.o||it.k==='tf')return it}catch(e){}
+ return null}
+function askHint(id){const E=V.exam;if(!E||E.done)return;E.hints=E.hints||{};if(E.hints[id])return;
+ const q=hintGateQ();if(!q){E.hints[id]=makeHint(findIt(id));E.hintN=(E.hintN||0)+1;rerenderKeep();return}
+ V.hg={id,q};hintSheet()}
+function findIt(id){for(const q of V.exam.qs)for(const p of q.parts)for(const it of p.items)if(it.id===id)return it;return null}
+function hintSheet(msg){const {q}=V.hg,en=V.exam.en,L=en?['a','b','c','d']:AL;
+ const opts=q.k==='mcq'?q.o.map((o,j)=>`<button class="opt" onclick="hintAns(${j})"><i>${L[j]}</i><span>${o}</span></button>`).join(''):[['t','صح','✓'],['f','خطأ','✗']].map(o=>`<button class="opt" onclick="hintAns('${o[0]}')"><i>${o[2]}</i><span>${o[1]}</span></button>`).join('');
+ sheet(`<div class="grab"></div><h3>💡 حتى ينفتح التلميح</h3><p class="sub2">جاوب على هالسؤال السهل من نفس المادة، وإذا جوابك صح يطلعلك التلميح.</p>
+ ${msg||''}<div class="hgq"><b>${ulz(stripWz(q.q))}</b>${q.k==='tf'?'<small>صح أم خطأ؟</small>':''}<div class="xo ${q.k==='tf'?'two':''}">${opts}</div></div>
+ <button class="btns" onclick="closeS()">إلغاء</button>`)}
+function hintAns(v){const {id,q}=V.hg;const ok=q.k==='mcq'?(+v===q.a):(v===(q.a?'t':'f'));
+ if(ok){const E=V.exam;E.hints=E.hints||{};E.hints[id]=makeHint(findIt(id));E.hintN=(E.hintN||0)+1;closeS();toast('✓ صح! هذا تلميحك');rerenderKeep(()=>{const el=document.getElementById('pi_'+id)||document.querySelector(`[data-hid="${id}"]`);if(el)el.scrollIntoView({block:'center',behavior:'smooth'})});return}
+ const right=q.k==='mcq'?q.o[q.a]:(q.a?'صح':'خطأ');const nq=hintGateQ();
+ if(!nq){closeS();return toast('الجواب غلط')}
+ V.hg={id,q:nq};hintSheet(`<div class="hgbad">✗ جوابك غلط — الصحيح: <b>${right}</b>. جرّب هالسؤال:</div>`)}
+function rerenderKeep(cb){const y=scrollY;render();scrollTo(0,y);if(cb)setTimeout(cb,60)}
+function hintBtn(it,R){const E=V.exam;if(R||E.done)return '';const h=(E.hints||{})[it.id];if(h)return '';return `<button class="hintb" onclick="askHint('${it.id}')">💡 تلميح</button>`}
+function hintBox(it){const h=((V.exam.hints||{})[it.id]);return h?`<div class="hintbox">💡 <span>${h.t}</span></div>`:''}
+function hintRm(it,j){const h=((V.exam.hints||{})[it.id]);return !!(h&&h.rm&&h.rm.includes(j))}
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
