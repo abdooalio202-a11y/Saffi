@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#169a5c">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="صفّي">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>صفّي — منصتك الدراسية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
@@ -774,6 +780,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .chcol{position:relative;border-radius:18px;padding:12px 6px;background:var(--bg2,#f4f5f9);text-align:center}.chcol.win{background:#fff7d6;box-shadow:0 0 0 2px #f5c542 inset}
 .chcol small{display:block;font-weight:700;color:var(--ink2)}.chcol b{display:block;font-size:30px}.chcol em{font-style:normal;font-size:12.5px;color:var(--ink3)}.crown{position:absolute;top:-14px;inset-inline-start:50%;transform:translateX(50%);font-size:22px}
 .qbars .qb{color:var(--ink);background:none;box-shadow:none;border-radius:0;padding:6px 0;font-family:inherit;font-size:13px;font-weight:600}.qbars .qb b{font-weight:700}
+.instc{display:flex;align-items:center;gap:10px;margin:12px 20px 0;padding:12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 20px -14px rgba(0,0,0,.4)}
+.instc .sq{width:42px;height:42px;border-radius:12px;background:var(--brandSoft);display:grid;place-items:center;font-size:22px;flex:0 0 auto}
+.instc b{display:block;font-size:14.5px}.instc small{display:block;font-size:12px;color:var(--ink3);margin-top:2px}.instc>div{flex:1;min-width:0}
+.instc .ib{all:unset;cursor:pointer;background:var(--brand);color:#fff;font-weight:700;padding:8px 16px;border-radius:12px;font-size:14px}
+.instc .ix{all:unset;cursor:pointer;color:var(--ink3);padding:4px}
+.iosst{display:grid;gap:10px;margin:8px 0 16px}.iosst>div{display:flex;gap:10px;align-items:flex-start}.iosst span{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;flex:0 0 auto}.iosst p{margin:2px 0 0;line-height:1.7}
+.cdc{margin:12px 20px 0;padding:16px;border-radius:24px;color:#fff;background:linear-gradient(140deg,#1e3a8a,#7c3aed 60%,#db2777);box-shadow:0 18px 36px -18px rgba(124,58,237,.7)}
+.cdtop{display:flex;align-items:center;justify-content:space-between;gap:10px}.cdtop small{opacity:.9;font-size:13px}.cdtop em{font-style:normal;font-size:12px;opacity:.85}
+.cdn{display:flex;align-items:baseline;gap:6px;margin:2px 0}.cdn b{font-size:46px;line-height:1.1;font-family:var(--hd)}.cdn span{font-size:16px;opacity:.9}
+.cdring{width:74px;height:74px;border-radius:50%;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.22) 0);display:grid;place-items:center;flex:0 0 auto}.cdring span{width:58px;height:58px;border-radius:50%;background:#5b2bb0;display:grid;place-items:center;font-size:20px;font-weight:700}
+.cdplan{margin-top:12px;background:rgba(255,255,255,.12);border-radius:16px;padding:10px}.cdph{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.cdph small{opacity:.85}
+.cdt{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:10px;background:#fff;color:var(--ink);border-radius:14px;padding:9px 10px;margin-top:6px}
+.cdt .cdk{width:24px;height:24px;border-radius:50%;border:2px solid #c4b5fd;display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}.cdt.done .cdk{background:#16a34a;border-color:#16a34a}
+.cdt b{display:block;font-size:14px}.cdt small{display:block;font-size:12px;color:var(--ink3)}.cdt>div{flex:1;min-width:0}.cdt .go{font-weight:700;color:#7c3aed;font-size:13px}
 </style>
 </head>
 <body>
@@ -5068,7 +5088,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٢/١١ (٧)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٢/١١ (٨)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5343,6 +5363,8 @@ function adExam(){const X=ADM.cfg.exam,gk=V.ad.xg||'',g=gk?GR[gk]:null;
  ${gk&&X.byG[gk]?`<button class="btns" style="margin-top:8px" onclick="delete ADM.cfg.exam.byG['${gk}'];admSave()">رجّع ${GR[gk].n} للإعداد الأساسي</button>`:''}
  ${gk?`<button class="btns" style="margin-top:8px" onclick="admCopyXG('${gk}')">طبّق إعدادات هذا الصف على كل صفوف مرحلته</button>`:''}
  <label class="ck" style="margin-top:10px"><input type="checkbox" ${X.choose?'checked':''} onchange="admSetX('choose',this.checked)"><span>أسئلة اختيارية (عرّف اثنين من ثلاثة)</span></label></div>
+ <div class="cfg"><div class="cfgh"><b>مواعيد الامتحانات الوزارية</b></div><p class="muted2">تطلع للطلاب بالعدّ التنازلي وخطة المراجعة. إذا ما حددت موعد يطلع موعد تقريبي.</p>
+ ${['p6','m3','s6','l6'].filter(k=>GR[k]).map(k=>`<div class="adkv"><span>${GR[k].n}</span><input class="inp" type="date" style="max-width:170px" value="${(ADM.cfg.wizDates||{})[k]||''}" onchange="ADM.cfg.wizDates=Object.assign({},ADM.cfg.wizDates||{});if(this.value)ADM.cfg.wizDates['${k}']=this.value;else delete ADM.cfg.wizDates['${k}'];admSave()"></div>`).join('')}</div>
  <div class="cfg"><div class="cfgh"><b>التصحيح بالذكاء الاصطناعي</b></div>
  <label class="ck"><input type="checkbox" ${X.ai?'checked':''} onchange="admSetX('ai',this.checked)"><span>صحّح أجوبة الكتابة بالمعنى باستعمال الذكاء الاصطناعي</span></label>
  <p class="muted2">يشتغل بعد ما تنشر دالة grade على Supabase وتضيف مفتاح Anthropic (الخطوات بملف README). الجواب ياخذ الأعلى بين التصحيح المحلي وتصحيح الذكاء الاصطناعي. إذا الدالة ما اشتغلت، الموقع يرجع للتصحيح المحلي تلقائياً.</p>${SB?'':'<p class="muted2" style="color:var(--bad)">يحتاج Supabase مربوط.</p>'}</div>
@@ -5462,7 +5484,7 @@ async function admBulkMove(sub){const ids=V.ad.bulk||[];if(!ids.length||!sub)ret
    ===================================================================== */
 const UI_DEF={
  name:'صفّي',tag:'منصتك الدراسية',logo:'',letter:'ص',color:'#5B4DFF',color2:'#3D8BFF',
- home:[{id:'notice',on:1},{id:'hero',on:1},{id:'kpis',on:1},{id:'blocks',on:1},{id:'subjects',on:1},{id:'papers',on:1},{id:'recent',on:1}],
+ home:[{id:'notice',on:1},{id:'install',on:1},{id:'count',on:1},{id:'hero',on:1},{id:'kpis',on:1},{id:'blocks',on:1},{id:'subjects',on:1},{id:'papers',on:1},{id:'recent',on:1}],
  sub:[{id:'quiz',on:1},{id:'full',on:1},{id:'exams',on:1},{id:'wiz',on:1},{id:'papers',on:1},{id:'units',on:1},{id:'note',on:1}],
  nav:{home:1,subs:1,hist:1,me:1},
  feat:{oath:1,dark:1,report:1,self:1,timer:1,kpis:1,book:1},
@@ -5480,7 +5502,7 @@ const TXT_DEF={
 };
 const TXT_GROUPS=[['صفحة الترحيب',['ob.title','ob.sub','ob.f1','ob.f2','ob.f3','ob.btn']],['الصفحة الرئيسية',['home.am','home.pm','hero.badge','hero.title','hero.sub','hero.btn','kpi.1','kpi.2','kpi.3','home.subjects','home.papers','home.recent','home.empty']],
  ['صفحة المادة',['sub.quiz','sub.quizSub','sub.exams','sub.m','sub.h','sub.f','sub.fn','sub.wiz','sub.papers','sub.units','sub.book','sub.noteReal']],['الشريط السفلي',['nav.home','nav.subs','nav.hist','nav.me']],['النتيجة',['res.pass','res.fail']]];
-const HOME_N={notice:'الإعلان',hero:'البطاقة الكبيرة (يلا نراجع)',kpis:'الإحصائيات',blocks:'بطاقاتك المخصصة',subjects:'المواد',papers:'الامتحانات الجاهزة',recent:'آخر النتائج'};
+const HOME_N={notice:'الإعلان',install:'بطاقة تثبيت التطبيق',count:'العدّ التنازلي للوزاري وخطة اليوم',hero:'البطاقة الكبيرة (يلا نراجع)',kpis:'الإحصائيات',blocks:'بطاقاتك المخصصة',subjects:'المواد',papers:'الامتحانات الجاهزة',recent:'آخر النتائج'};
 const SUBP_N={quiz:'زر اختبرني',full:'زر الامتحان الشامل',exams:'أزرار الامتحانات',wiz:'الأسئلة الوزارية',papers:'امتحانات الإدارة',units:'فصول المنهج',note:'ملاحظة المصدر'};
 function UIc(){const u=ADM.cfg.ui||{};const o=Object.assign(clone(UI_DEF),u);o.nav=Object.assign({},UI_DEF.nav,u.nav||{});o.feat=Object.assign({},UI_DEF.feat,u.feat||{});o.txt=Object.assign({},u.txt||{});
  const fix=(arr,def)=>{arr=(arr||[]).filter(x=>def.some(d=>d.id===x.id));def.forEach((d,di)=>{if(!arr.some(x=>x.id===d.id))arr.splice(Math.min(di,arr.length),0,Object.assign({},d))});return arr};o.home=fix(u.home,UI_DEF.home);o.sub=fix(u.sub,UI_DEF.sub);return o}
@@ -5531,6 +5553,8 @@ function homeV(){
  const kpi=(ic,c,b,s)=>`<div class="kpi"><span class="ic" style="background:${c}1f;color:${c}">${I(ic)}</span><div><b>${b}</b><span>${esc(s)}</span></div></div>`;
  const allP=g.subs.flatMap(s=>papersFor(U.grade,s));
  const S={
+  install:()=>installCard(),
+  count:()=>countCard(),
   notice:()=>ADM.cfg.site.notice?`<div class="note ok" style="margin:12px 20px 0">${I('bolt',18)} ${esc(ADM.cfg.site.notice)}</div>`:'',
   hero:()=>`<div class="hero2"><span class="art">${u.logo?`<img src="${u.logo}" alt="" style="width:62px;height:62px;object-fit:contain">`:I('cap')}</span><small>${esc(T('hero.badge',{n:toAr(tot)}))}</small><h2>${esc(T('hero.title'))}</h2><p>${esc(T('hero.sub'))}</p><button class="go" onclick="go('subs')">${esc(T('hero.btn'))} ${I('back',18).replace('class="i"','class="i" style="transform:scaleX(-1)"')}</button></div>`,
   kpis:()=>`<div class="kpis">${kpi('file',u.color,toAr(h.length),T('kpi.1'))}${kpi('trend','#12B886',h.length?toAr(avg):'—',T('kpi.2'))}${kpi('award','#FFB020',h.length?toAr(best):'—',T('kpi.3'))}</div>`,
@@ -5935,6 +5959,60 @@ function chalResult(E){const C=E.chal;if(!C)return '';
   <p class="sub2" style="margin:8px 0 0;text-align:center">جاوبت صح ${toAr(mineOnly)} سؤال غلط بيه ${esc(C.n)}، وهو جاوب صح ${toAr(hisOnly)} سؤال غلطت بيه.</p></div>`}
 /* نسجل وقت الامتحان بالثواني */
 (function(){const _f=finish;finish=async function(){const E=V.exam;if(E&&!E.done)E.sec=Math.round((Date.now()-(V.t0||Date.now()))/1000);return _f.apply(this,arguments)}})();
+
+/* =====================================================================
+   تثبيت الموقع كتطبيق
+   ===================================================================== */
+const PWA={ev:null,standalone:()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,
+ ios:()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)};
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();PWA.ev=e;if(V.scr==='home')render()});
+window.addEventListener('appinstalled',()=>{PWA.ev=null;toast('تثبّت صفّي على موبايلك ✓');if(V.scr==='home')render()});
+if('serviceWorker' in navigator&&(/^https:/.test(location.protocol)||location.hostname==='localhost')){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}
+function canInstall(){if(PWA.standalone())return false;const x=LS.get('instx',0);if(x&&Date.now()-x<14*864e5)return false;return !!PWA.ev||PWA.ios()}
+async function doInstall(){
+ if(PWA.ev){PWA.ev.prompt();try{const r=await PWA.ev.userChoice;if(r&&r.outcome==='accepted')PWA.ev=null}catch(e){}render();return}
+ if(PWA.ios()){sheet(`<div class="grab"></div><h3>📲 ثبّت صفّي على الآيفون</h3>
+  <div class="iosst"><div><span>١</span><p>افتح الموقع من <b>Safari</b> (إذا فاتحه من متصفح ثاني)</p></div>
+  <div><span>٢</span><p>اضغط زر المشاركة <b class="shic">⬆️</b> بأسفل الشاشة</p></div>
+  <div><span>٣</span><p>انزل واختار <b>«إضافة إلى الشاشة الرئيسية»</b></p></div>
+  <div><span>٤</span><p>اضغط <b>«إضافة»</b> — وتطلع أيقونة صفّي جنب تطبيقاتك</p></div></div>
+  <button class="btnp" onclick="closeS()">تمام</button>`);return}
+ sheet(`<div class="grab"></div><h3>📲 ثبّت صفّي</h3><p class="sub2">من قائمة المتصفح (⋮) اختار <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</p><button class="btnp" onclick="closeS()">تمام</button>`)}
+function installCard(){if(!canInstall())return '';
+ return `<div class="instc"><span class="sq">📲</span><div><b>ثبّت صفّي على موبايلك</b><small>يفتح مثل التطبيق، أسرع، ويشتغل حتى بدون إنترنت</small></div><button class="ib" onclick="doInstall()">ثبّت</button><button class="ix" onclick="LS.set('instx',Date.now());render()" aria-label="إخفاء">${I('x',16)}</button></div>`}
+
+/* =====================================================================
+   العدّ التنازلي للامتحان الوزاري + خطة مراجعة يومية
+   ===================================================================== */
+const WIZ_DEF={p6:'2027-05-22',m3:'2027-06-05',s6:'2027-06-19',l6:'2027-06-19'};
+function wizDate(gk){const s=(ADM.cfg.wizDates||{})[gk];return {d:s||WIZ_DEF[gk]||null,approx:!s}}
+const dayKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dayN=s=>{const [y,m,d]=s.split('-').map(Number);return Math.floor(Date.UTC(y,m-1,d)/864e5)};
+function planTasks(gk){const g=GR[gk];const L=g.subs.filter(s=>SUB[s]&&stats(gk,s).total>0).map(s=>stats(gk,s).units.map((u,i)=>({s,ui:i,n:u.n})).filter((x,i)=>stats(gk,s).units[i].c>0));
+ const out=[];for(let j=0;L.some(l=>j<l.length);j++)L.forEach(l=>{if(j<l.length)out.push(l[j])});return out}
+function planToday(gk){const W=wizDate(gk);if(!W.d)return null;const today=dayN(dayKey(new Date())),exam=dayN(W.d);const left=exam-today;if(left<0)return {left,tasks:[]};
+ let st=LS.get('plan0_'+gk,null);if(!st||dayN(st)>today){st=dayKey(new Date());LS.set('plan0_'+gk,st)}
+ const start=dayN(st),total=Math.max(1,exam-start),i=today-start;const rev=Math.min(7,Math.floor(total/5));const study=Math.max(1,total-rev);
+ const T=planTasks(gk);if(!T.length)return {left,tasks:[]};
+ let tasks;if(i>=study){const subs=[...new Set(T.map(t=>t.s))];tasks=[{s:subs[(i-study)%subs.length],full:1}]}
+ else if(T.length>=study)tasks=T.slice(Math.floor(i*T.length/study),Math.max(Math.floor(i*T.length/study)+1,Math.floor((i+1)*T.length/study)));
+ else tasks=[T[i%T.length]];
+ const done=LS.get('pdone_'+gk,{})[dayKey(new Date())]||[];
+ return {left,tasks:tasks.map(t=>Object.assign({},t,{key:t.full?'full:'+t.s:t.s+':'+t.ui,done:done.includes(t.full?'full:'+t.s:t.s+':'+t.ui)})),review:i>=study,approx:W.approx,date:W.d}}
+function planGo(s,ui,full){V.sub=s;V.planTask=full?'full:'+s:s+':'+ui;
+ if(full){startFull();return}
+ openQB([ui]);V.qb.all=false;V.qb.n=10;startQuiz()}
+function planMark(){const k=V.planTask;if(!k)return;V.planTask=null;const all=LS.get('pdone_'+U.grade,{});const dk=dayKey(new Date());all[dk]=[...new Set([...(all[dk]||[]),k])];
+ Object.keys(all).sort().slice(0,-30).forEach(x=>delete all[x]);LS.set('pdone_'+U.grade,all)}
+function countCard(){const g=GR[U.grade];if(!g||!g.wiz)return '';const P=planToday(U.grade);if(!P)return '';
+ if(P.left<0)return '';
+ const dn=new Date(P.date+'T00:00:00');const ds=toAr(dn.getDate())+' '+['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'][dn.getMonth()];
+ const nd=P.tasks.filter(t=>t.done).length;
+ return `<div class="cdc"><div class="cdtop"><div><small>⏳ باقي على الامتحان الوزاري</small><div class="cdn"><b>${toAr(P.left)}</b><span>${P.left===1?'يوم':P.left===2?'يومين':P.left<=10?'أيام':'يوم'}</span></div><em>${ds}${P.approx?' · موعد تقريبي':''}</em></div><div class="cdring" style="--p:${Math.max(3,Math.min(100,100-P.left/3))}"><span>${P.left===0?'اليوم!':'💪'}</span></div></div>
+ ${P.tasks.length?`<div class="cdplan"><div class="cdph"><b>${P.review?'🔁 مراجعة شاملة اليوم':'📅 خطة اليوم'}</b><small>${toAr(nd)}/${toAr(P.tasks.length)} مكتملة</small></div>
+ ${P.tasks.map(t=>`<button class="cdt ${t.done?'done':''}" onclick="planGo('${t.s}',${t.ui||0},${t.full?1:0})"><span class="cdk">${t.done?'✓':''}</span><div><b>${esc(SUB[t.s].n)}</b><small>${t.full?'امتحان شامل لكل المادة':esc(t.n)+' · اختبار ١٠ أسئلة'}</small></div><span class="go">${t.done?'أعد':'ابدأ'}</span></button>`).join('')}</div>`:''}</div>`}
+/* نسجّل المهمة مكتملة بعد التسليم */
+(function(){const _f=finish;finish=async function(){const r=await _f.apply(this,arguments);try{if(V.planTask)planMark()}catch(e){}return r}})();
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
