@@ -965,6 +965,33 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .bzw{text-align:start;background:var(--surface2);border-radius:16px;padding:12px 14px;display:grid;gap:8px}
 .bzw>b{font-size:14px}.bzw div{font-size:13.5px;line-height:1.7;border-top:1px solid var(--line);padding-top:6px}.bzw em{display:block;font-style:normal;color:#16a34a;font-weight:600}
 @media(prefers-reduced-motion:reduce){.fcard,.bzfire,.bzo button.wrong{transition:none;animation:none}}
+
+/* ===== ui12: الجواب بالصوت ===== */
+.npa .aaw{position:relative}
+.npa .aaw .nl{padding-inline-end:52px}
+.npa .micb{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;left:6px;top:12px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:#eef2ff;color:#1d3fa8;border:1px solid #c7d2fe;transition:transform .1s}
+.npa .aaw input.nl~.micb{top:8px;width:36px;height:36px}
+.npa .micb:active{transform:scale(.92)}
+.npa .micb.rec{background:#ef4444;color:#fff;border-color:#ef4444;animation:micp 1.2s infinite}
+@keyframes micp{0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.npa .nl.recf{border-color:#ef4444!important;background:#fff5f5!important}
+.npa .mictip{font:500 12px "IBM Plex Sans Arabic",sans-serif;color:#6b7280;margin-top:4px}
+.npa .aaw .ltr~.micb{left:auto;right:6px}.npa .aaw .nl.ltr{padding-inline-end:10px;padding-right:52px}
+@media(prefers-reduced-motion:reduce){.npa .micb.rec{animation:none}}
+/* ===== اختيار الفصول بالتحدي ===== */
+.bzpick{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;margin-top:12px;display:grid;gap:8px}
+.bzph{display:flex;justify-content:space-between;align-items:center;gap:8px}.bzph b{font-size:15px}
+.bzph button{all:unset;cursor:pointer;color:var(--pri);font-weight:700;font-size:13px;padding:6px 4px}
+.bzu{border:1.5px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .15s}
+.bzu.on{border-color:#f97316;background:color-mix(in srgb,#f97316 6%,var(--surface))}
+.bzuh{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;min-height:46px}
+.bzuh .bzck{width:22px;height:22px;border-radius:7px;border:1.8px solid var(--line2);display:grid;place-items:center;font:800 13px/1 system-ui,sans-serif;color:#fff;flex:none}
+.bzu.on .bzck{background:#f97316;border-color:#f97316}
+.bzuh b{flex:1;font-size:14px;font-weight:600}.bzuh small{color:var(--ink2);font-size:12px;white-space:nowrap}
+.bzls{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 11px}
+.bzls button{all:unset;cursor:pointer;font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line2);color:var(--ink2);background:var(--surface)}
+.bzls button.on{background:#f97316;border-color:#f97316;color:#fff}
+.bzgo{position:sticky;bottom:12px;margin:12px 0 24px;z-index:3}
 </style>
 </head>
 <body>
@@ -5259,7 +5286,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٥/١١ (١١)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٥/١١ (١٢)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5837,8 +5864,8 @@ function npAns(E,it,R,qi,pi,p){
   inp=`<div class="pmo ${ml>32?'c1':ml>14?'c2':''}">${it.o.map((o,j)=>`<button class="opt ${v==j?'on':''} ${R?(j===it.a?'right':(v==j?'wrong':'')):''} ${!R&&hintRm(it,j)?'gone':''}" data-id="${it.id}" data-v="${j}" ${dis||(hintRm(it,j)?'disabled':'')}><i>${L[j]}</i><span>${o}</span></button>`).join('')}</div>`}
  else if(it.k==='tf'){const c=it.a?'t':'f';inp=`<div class="tfb">${[['t',en?'True':'صح'],['f',en?'False':'خطأ']].map(o=>`<button class="opt w ${v===o[0]?'on':''} ${R?(o[0]===c?'right':(v===o[0]?'wrong':'')):''}" data-id="${it.id}" data-v="${o[0]}" ${dis}><i>${o[0]==='t'?'✓':'✗'}</i><span>${o[1]}</span></button>`).join('')}</div>`}
  else if(R&&!String(v||'').trim())inp='';
- else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<textarea class="aa nl ${en?'ltr':''}" rows="2" data-id="${it.id}" ${R?'':`placeholder="${en?'Write your answer…':'اكتب الجواب هنا…'}"`} ${dis}>${esc(v||'')}</textarea>`;
- else{const ltr=it.k==='dna'||en||it.l;inp=`<input class="aa nl one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${R?'':`placeholder="${it.k==='calc'?'الناتج…':en?'Answer…':'الجواب…'}"`} ${dis}>`}
+ else if(['def','why','fn','loc','diff','irab','fix','tr'].includes(it.k))inp=`<div class="aaw"><textarea class="aa nl ${en?'ltr':''}" rows="2" data-id="${it.id}" ${R?'':`placeholder="${en?'Write or say your answer…':'اكتب الجواب أو سجّله بصوتك…'}"`} ${dis}>${esc(v||'')}</textarea>${R?'':micBtn(it,en)}</div>`;
+ else{const ltr=it.k==='dna'||en||it.l;inp=`<div class="aaw"><input class="aa nl one ${ltr?'ltr':''}" data-id="${it.id}" value="${String(v||'').replace(/"/g,'&quot;')}" ${R?'':`placeholder="${it.k==='calc'?'الناتج…':en?'Answer…':'الجواب…'}"`} ${dis}>${R?'':micBtn(it,en||it.k==='dna')}</div>`}
  let fb='';
  if(R){if(sk)return `<div class="iskn">متروكة</div>`;const ok=it.sc>=it.mk-1e-6,half=!ok&&it.sc>0,cls=ok?'ok':half?'half':'no';
   fb=`<div class="xfb ${cls}"><div class="r1"><b>${ok?'صحيحة':half?'جزئية':v?'خاطئة':'لم تُجب'}</b><span>${toAr(+it.sc.toFixed(1))} / ${toAr(+it.mk.toFixed(1))}${it.self?' · تصحيح ذاتي':''}${it.ai?' · صُحّح بالمعنى':''}</span></div>${!ok&&!['mcq','tf'].includes(it.k)?`<div class="ma"><small>الإجابة النموذجية</small>${correctText(it)}</div>`:''}${!ok&&!['mcq','tf','dna','calc'].includes(it.k)&&v?`<button class="selfok" onclick="selfFix('${it.id}')">${I('check',14)} جوابي صحيح بنفس المعنى — احسبه</button>`:''}<button class="rep" onclick="report('${it.id}')">${I('flag',12)} إبلاغ</button></div>`}
@@ -6422,19 +6449,29 @@ function fcBind(){const e=document.getElementById('fcc');if(!e)return;let x0=nul
  e.addEventListener('touchend',()=>{if(x0==null)return;x0=null;e.parentNode.dataset.sw='';if(Math.abs(dx)>80){fcMark(dx>0?1:0)}else{e.style.transition='transform .2s';e.style.transform='';setTimeout(()=>{moved=false},50)}})}
 
 /* ---------- تحدي الدقيقة ---------- */
-function bzPool(gk,sub){const us=unitsFor(gk,sub)||[];const out=[];
- us.forEach(u=>(u.ls||[]).forEach(l=>(l.q||[]).forEach(x=>{if(x.gen)return;if(x.k==='tf'||(x.k==='mcq'&&x.o&&x.o.length>=2))out.push(x)})));
- if(out.length<12)us.forEach(u=>(u.ls||[]).forEach(l=>(l.gen||[]).forEach(g=>{for(let i=0;i<6;i++)out.push({k:'calc',gen:g})})));
+function bzPool(gk,sub,sel){const us=unitsFor(gk,sub)||[];const out=[];
+ const okL=(ui,li)=>!sel||(sel.u.includes(ui)&&(!sel.ls||!sel.ls[ui]||sel.ls[ui].includes(li)));
+ us.forEach((u,ui)=>(u.ls||[]).forEach((l,li)=>{if(!okL(ui,li))return;(l.q||[]).forEach(x=>{if(x.gen)return;if(x.k==='tf'||(x.k==='mcq'&&x.o&&x.o.length>=2))out.push(x)})}));
+ if(out.length<12)us.forEach((u,ui)=>(u.ls||[]).forEach((l,li)=>{if(!okL(ui,li))return;(l.gen||[]).forEach(g=>{for(let i=0;i<6;i++)out.push({k:'calc',gen:g})})}));
  return out}
+const bzSelKey=(gk,sub)=>'bzsel_'+gk+'_'+sub;
+function bzSel(){const us=unitsFor(U.grade,V.sub)||[];let s=LS.get(bzSelKey(U.grade,V.sub),null);
+ if(!s||!Array.isArray(s.u))s={u:us.map((_,i)=>i),ls:{}};s.u=s.u.filter(i=>i<us.length);s.ls=s.ls||{};return s}
+function bzSave(s){LS.set(bzSelKey(U.grade,V.sub),s)}
+function bzTogU(i){const s=bzSel();if(i<0){const us=unitsFor(U.grade,V.sub)||[];s.u=s.u.length===us.length?[]:us.map((_,k)=>k);s.ls={}}
+ else{if(s.u.includes(i)){s.u=s.u.filter(x=>x!==i);delete s.ls[i]}else{s.u.push(i);s.u.sort((a,b)=>a-b)}}bzSave(s);render()}
+function bzTogL(i,j){const s=bzSel();const us=unitsFor(U.grade,V.sub)||[];const n=(us[i].ls||[]).length;let L=s.ls[i]||[...Array(n).keys()];
+ L=L.includes(j)?L.filter(x=>x!==j):L.concat(j).sort((a,b)=>a-b);if(!L.length){s.u=s.u.filter(x=>x!==i);delete s.ls[i]}else if(L.length===n)delete s.ls[i];else s.ls[i]=L;bzSave(s);render()}
+function bzQC(ui,li){const us=unitsFor(U.grade,V.sub)||[];const one={u:[ui],ls:li==null?{}:{[ui]:[li]}};return bzPool(U.grade,V.sub,one).length}
 function bzBest(){return LS.get(bzKey(U.grade,V.sub),0)||0}
-function startBlitz(sub){if(sub)V.sub=sub;closeS();if(bzPool(U.grade,V.sub).length<6)return toast('الأسئلة قليلة لهالمادة بعد');V.bz={st:'ready'};go('blitz')}
-function bzNext(){const B=V.bz;let p=B.pool;if(!p.length)p=B.pool=shuffle(bzPool(U.grade,V.sub));const raw=p.pop();
+function startBlitz(sub){if(sub)V.sub=sub;closeS();if(bzPool(U.grade,V.sub).length<4)return toast('الأسئلة قليلة لهالمادة بعد');V.bz={st:'ready'};go('blitz')}
+function bzNext(){const B=V.bz;let p=B.pool;if(!p.length)p=B.pool=shuffle(bzPool(U.grade,V.sub,bzSel()));const raw=p.pop();
  let it=makeItem(V.sub,GR[U.grade].b,raw);
  if(it.k==='calc'){const ans=String(it.ans!=null?it.ans:it.m);const n=+ans;const o=[ans];if(!isNaN(n)){[1,-1,2,10,-2].forEach(d=>{if(o.length<4&&!o.includes(String(n+d)))o.push(String(n+d))})}if(o.length<2)return bzNext();
   const sh=shuffle(o);it={k:'mcq',q:it.q,o:sh,a:sh.indexOf(ans)}}
  if(it.k==='mcq'&&it.o.length>4){const cor=it.o[it.a];const others=shuffle(it.o.filter((_,j)=>j!==it.a)).slice(0,3);const o=shuffle([cor].concat(others));it=Object.assign({},it,{o,a:o.indexOf(cor)})}
  B.q=it;B.lock=false}
-function bzGo(){clearInterval(V.bzT);const B=V.bz={st:'run',t0:Date.now(),dur:60000,score:0,ok:0,n:0,streak:0,maxs:0,wrong:[],pool:shuffle(bzPool(U.grade,V.sub)),best:bzBest()};bzNext();render();
+function bzGo(){clearInterval(V.bzT);const B=V.bz={st:'run',t0:Date.now(),dur:60000,score:0,ok:0,n:0,streak:0,maxs:0,wrong:[],pool:shuffle(bzPool(U.grade,V.sub,bzSel())),best:bzBest()};if(B.pool.length<4){V.bz={st:'ready'};return toast('اختار فصول أكثر — الأسئلة قليلة')}bzNext();render();
  V.bzT=setInterval(()=>{if(V.scr!=='blitz'||!V.bz||V.bz.st!=='run'){clearInterval(V.bzT);return}const left=Math.max(0,B.dur-(Date.now()-B.t0));
   const t=document.getElementById('bzt'),b=document.getElementById('bzb');if(t)t.textContent=toAr(Math.ceil(left/1000));if(b){b.style.width=(left/B.dur*100)+'%';b.classList.toggle('lo',left<10000)}
   if(left<=0)bzEnd()},100)}
@@ -6448,14 +6485,19 @@ function bzAns(v){const B=V.bz;if(!B||B.st!=='run'||B.lock)return;B.lock=true;co
 function bzEnd(){const B=V.bz;if(!B||B.st!=='run')return;clearInterval(V.bzT);B.st='end';const old=bzBest();B.rec=B.score>old;if(B.rec)LS.set(bzKey(U.grade,V.sub),B.score);B.best=Math.max(old,B.score);
  const tot=(LS.get('bzall',0)||0)+1;LS.set('bzall',tot);render();if(B.rec&&B.score>0&&typeof confetti==='function')confetti()}
 function blitzV(){const B=V.bz;if(!B)return homeV();const m=SUB[V.sub],en=V.sub==='english';const head=gameTop('⚡ تحدي الدقيقة',"clearInterval(V.bzT);go('sub')");
- if(B.st==='ready'){const best=bzBest();
-  return head+`<div class="pad"><div class="gend bzst"><div class="big">⚡</div><h2>عندك دقيقة وحدة!</h2><p>جاوب أكثر عدد من الأسئلة السريعة (صح وخطأ واختيارات). كل جواب صح نقطة، ومن تصير عندك ٥ صح ورا بعض كل جواب يصير بنقطتين 🔥</p>
-  <div class="bzbest">أفضل نتيجة إلك: <b>${toAr(best)}</b></div><button class="btnp" style="background:${m.c};color:#fff" onclick="bzGo()">يلا نبدأ</button></div></div>`}
+ if(B.st==='ready'){const best=bzBest(),us=unitsFor(U.grade,V.sub)||[],sel=bzSel(),n=bzPool(U.grade,V.sub,sel).length,all=sel.u.length===us.length&&!Object.keys(sel.ls).length;
+  const rows=us.map((u,i)=>{const c=bzQC(i);if(!c)return '';const on=sel.u.includes(i),ls=u.ls||[];
+   const sub=on&&ls.length>1?`<div class="bzls">${ls.map((l,j)=>{const lc=bzQC(i,j);if(!lc)return '';const lon=!sel.ls[i]||sel.ls[i].includes(j);return `<button class="${lon?'on':''}" onclick="bzTogL(${i},${j})">${esc(l.n||('موضوع '+toAr(j+1)))}</button>`}).join('')}</div>`:'';
+   return `<div class="bzu ${on?'on':''}"><button class="bzuh" onclick="bzTogU(${i})"><span class="bzck">${on?'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':''}</span><b>${esc(u.n)}</b><small>${toAr(c)}</small></button>${sub}</div>`}).join('');
+  return head+`<div class="pad"><div class="gend bzst"><div class="big">⚡</div><h2>عندك دقيقة وحدة!</h2><p>جاوب أكثر عدد من الأسئلة السريعة. كل جواب صح نقطة، ومن تجاوب ٥ صح ورا بعض كل جواب يصير بنقطتين 🔥</p>
+  <div class="bzbest">أفضل نتيجة إلك: <b>${toAr(best)}</b></div></div>
+  <div class="bzpick"><div class="bzph"><b>شنو تريد يجيك بالتحدي؟</b><button onclick="bzTogU(-1)">${all?'إلغاء الكل':'اختار الكل'}</button></div>${rows}</div>
+  <div class="bzgo"><button class="btnp" style="background:${m.c};color:#fff" ${n<4?'disabled':''} onclick="bzGo()">${n<4?'اختار فصل واحد على الأقل':`يلا نبدأ · ${toAr(n)} سؤال`}</button></div></div>`}
  if(B.st==='end'){const acc=B.n?Math.round(B.ok/B.n*100):0;
   return head+`<div class="pad"><div class="gend"><div class="big">${B.rec?'🏆':B.score>=B.best*0.7?'👏':'💪'}</div><h2>${B.rec?'رقم قياسي جديد!':'خلص الوقت!'}</h2>
   <div class="bzres"><div><b>${toAr(B.score)}</b><small>نقاطك</small></div><div><b>${toAr(B.ok)}/${toAr(B.n)}</b><small>صح</small></div><div><b>${toAr(acc)}٪</b><small>الدقة</small></div><div><b>${toAr(B.best)}</b><small>أفضل نتيجة</small></div></div>
   ${B.wrong.length?`<div class="bzw"><b>راجع هذني (${toAr(B.wrong.length)})</b>${B.wrong.slice(0,6).map(w=>`<div><span ${en?'dir="ltr"':''}>${ulz(w.q)}</span><em ${en?'dir="ltr"':''}>✓ ${ulz(w.a)}</em></div>`).join('')}</div>`:''}
-  <button class="btnp" style="background:${m.c};color:#fff" onclick="bzGo()">↻ مرة ثانية</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`}
+  <button class="btnp" style="background:${m.c};color:#fff" onclick="bzGo()">↻ مرة ثانية</button><button class="btns" onclick="V.bz={st:'ready'};render()">غيّر الفصول</button><button class="btns" onclick="go('sub')">رجوع للمادة</button></div></div>`}
  const it=B.q,left=Math.max(0,B.dur-(Date.now()-B.t0));
  const opts=it.k==='tf'?[['t',en?'True':'صح ✓'],['f',en?'False':'خطأ ✗']]:it.o.map((o,j)=>[String(j),o]);
  return head+`<div class="pad"><div class="bzhd"><div class="bztime"><span id="bzt">${toAr(Math.ceil(left/1000))}</span><small>ثانية</small></div><div class="bzpts"><span id="bzs">${toAr(B.score)}</span><small>نقطة</small></div>${B.streak>=2?`<div class="bzfire">🔥×${toAr(B.streak)}</div>`:''}</div>
@@ -6484,6 +6526,28 @@ function subChips(){const ms=subMastery(U.grade,V.sub),c=fcCount(U.grade,V.sub),
 
 /* ربط الشاشات */
 (function(){const _r=render;render=function(){const r=_r.apply(this,arguments);if(V.scr==='cards')fcBind();return r}})();
+/* =====================================================================
+   ui12: تسجيل الجواب بالصوت بورقة الأسئلة
+   ===================================================================== */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let MIC=null;
+function micOK(){return !!SR}
+function micBtn(it,en){return micOK()?`<button type="button" class="micb" data-mic="${it.id}" data-en="${en?1:0}" aria-label="سجّل جوابك بالصوت" onclick="micToggle(this)"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>`:''}
+function micStop(){if(MIC){try{MIC.r.stop()}catch(e){}}}
+function micToggle(b){if(MIC&&MIC.b===b){micStop();return}micStop();
+ const id=b.dataset.mic,el=document.querySelector(`.npa .aa[data-id="${id}"]`);if(!el)return;
+ let r;try{r=new SR()}catch(e){return toast('جهازك ما يدعم التسجيل الصوتي — اكتب الجواب')}
+ r.lang=b.dataset.en==='1'?'en-US':'ar-IQ';r.interimResults=true;r.continuous=false;r.maxAlternatives=1;
+ const base=el.value.trim();let fin='';
+ MIC={r,b,el};b.classList.add('rec');el.classList.add('recf');
+ const box=el.closest('.aaw');let tip=box.querySelector('.mictip');if(!tip){tip=document.createElement('div');tip.className='mictip';box.appendChild(tip)}tip.textContent='🎙️ تكلم هسه… اضغط مرة ثانية حتى توكف';
+ r.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t+' ';else it+=t}
+  el.value=(base?base+' ':'')+(fin+it).trim();el.dispatchEvent(new Event('input',{bubbles:true}))};
+ r.onerror=e=>{const m={'not-allowed':'لازم تسمح للموقع يستخدم المايك من إعدادات المتصفح','service-not-allowed':'لازم تسمح للموقع يستخدم المايك من إعدادات المتصفح','no-speech':'ما سمعت صوت — جرب مرة ثانية وتكلم بوضوح','network':'التسجيل الصوتي يحتاج إنترنت','audio-capture':'ما لكيت مايك بجهازك'}[e.error];if(m)toast(m)};
+ r.onend=()=>{b.classList.remove('rec');el.classList.remove('recf');const v=el.value.trim();tip.textContent=v&&v!==base?'✓ سجّلت جوابك — تكدر تعدّله بالكتابة إذا تريد':'';if(!tip.textContent)tip.remove();MIC=null};
+ try{r.start()}catch(e){b.classList.remove('rec');MIC=null;toast('ما كدرت أشغّل المايك')}}
+/* يوكف التسجيل إذا طلع من الامتحان */
+(function(){const _r=render;render=function(){if(MIC&&V.scr!=='exam')micStop();return _r.apply(this,arguments)}})();
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
