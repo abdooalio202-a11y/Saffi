@@ -5539,7 +5539,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٤)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٥)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -7357,20 +7357,20 @@ function genMine(pages,us,en,KW){ // pages: [{p,text}] → قوائم مرشحة
  return C}
 
 function gShuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function genBuild(C,target,en){const out=[];const terms=[...new Map(C.def.concat(C.name).map(x=>[NK(x.t),x])).values()];
+function genBuild(C,target,en,minP){minP=minP||0;const out=[];const NEW=x=>(x.p||0)>minP;const terms=[...new Map(C.def.concat(C.name).map(x=>[NK(x.t),x])).values()];
  const others=(t,unit)=>{const same=terms.filter(x=>NK(x.t)!==NK(t)&&x.unit===unit),all=terms.filter(x=>NK(x.t)!==NK(t));return gShuf((same.length>=3?same:all).slice()).slice(0,3).map(x=>x.t)};
  const W=s=>s.split(/\s+/).length;
  const L={def:[],mcq:[],tf:[],b:[],why:[],name:[],fn:[]};
- C.def.forEach(x=>{L.def.push({k:'def',q:x.t,m:x.d,unit:x.unit});
+ C.def.forEach(x=>{if(!NEW(x))return;L.def.push({k:'def',q:x.t,m:x.d,unit:x.unit});
   const o=others(x.t,x.unit);if(o.length===3&&x.d.split(/\s+/).length<=35)L.mcq.push({k:'mcq',q:(en?'Which word means: ':'ما المصطلح الذي يدل على: ')+x.d+(en?'?':'؟'),o:[x.t].concat(o),unit:x.unit});
   const ts=gTidy(x.s);if(ts.split(/\s+/).length<=30&&!GLIST.test(gClean(x.s))&&!GIMP.test(ts+' ')){if(Math.random()<.5)L.tf.push({k:'tf',q:ts,a:true,unit:x.unit});else{const f=others(x.t,x.unit)[0];const ix=GWB(ts,x.t);if(f&&ix>=0)L.tf.push({k:'tf',q:ts.slice(0,ix)+f+ts.slice(ix+x.t.length),a:false,unit:x.unit})}}});
- C.name.forEach(x=>{L.name.push({k:'tr',q:(en?'What do we call: ':'ماذا يسمى: ')+x.d+(en?'?':'؟'),m:x.t,unit:x.unit});
+ C.name.forEach(x=>{if(!NEW(x))return;L.name.push({k:'tr',q:(en?'What do we call: ':'ماذا يسمى: ')+x.d+(en?'?':'؟'),m:x.t,unit:x.unit});
   const o=others(x.t,x.unit);if(o.length===3)L.mcq.push({k:'mcq',q:x.d+(en?' is called:':'، يسمى:'),o:[x.t].concat(o),unit:x.unit})});
- C.why.forEach(x=>{if(W(x.q)>=3)L.why.push({k:'why',q:x.q,m:x.a,unit:x.unit})});
- C.fn.forEach(x=>L.fn.push({k:'fn',q:x.t,m:x.d,unit:x.unit}));
+ C.why.forEach(x=>{if(NEW(x)&&W(x.q)>=3)L.why.push({k:'why',q:x.q,m:x.a,unit:x.unit})});
+ C.fn.forEach(x=>NEW(x)&&L.fn.push({k:'fn',q:x.t,m:x.d,unit:x.unit}));
  // فراغات: جملة من الكتاب بيها مصطلح معروف
  const tl=terms.filter(x=>x.t.length>=3).sort((a,b)=>b.t.length-a.t.length);
- C.sent.forEach(({s,unit})=>{const n=W(s);if(n<6||n>32)return;if(/:/.test(s.slice(0,40))||GLIST.test(s))return;let ti=-1;const t=tl.find(x=>{ti=GWB(s,x.t);return ti>3});
+ C.sent.forEach(({s,unit,p})=>{if(p<=minP)return;const n=W(s);if(n<6||n>32)return;if(/:/.test(s.slice(0,40))||GLIST.test(s))return;let ti=-1;const t=tl.find(x=>{ti=GWB(s,x.t);return ti>3});
   if(t)L.b.push({k:'blank',q:s.slice(0,ti)+'......'+s.slice(ti+t.t.length),a:t.t,unit});
   else{const m=s.match(/(^|\s)([0-9٠-٩]+(?:[.,][0-9٠-٩]+)?\s*(?:%|كغم|غم|كم|سم|ملم|لتر|مل|درجة|درجات|سنة|سنوات|يوماً|يوما|أيام|ساعة|ساعات|مايكرون|ثانية|ملغم|km|cm|mm|kg|g|m|s|°C))(?=[\s.،,]|$)/);if(m&&n>=8&&s.indexOf(m[2])>5)L.b.push({k:'blank',q:s.replace(m[2],'......'),a:m[2].trim(),unit})}});
  Object.values(L).forEach(gShuf);
@@ -7397,25 +7397,26 @@ async function genBook(file){const A=V.ad;if(!file||V.gen.busy)return;
   doc=await lib.getDocument({url,disableAutoFetch:true,disableStream:false,rangeChunkSize:262144,isEvalSupported:false,useSystemFonts:true}).promise;const N=doc.numPages;
   // كل صفحة تنقرا تنحفظ بالجهاز فوراً، فإذا الموقع تحدّث يكمل من نفس المكان
   let saved=null;try{saved=await IDB.get(key)}catch(e){}
-  const pages=(saved&&saved.pages)||[];const done=(saved&&saved.done)||0;let start=Math.max(done,pages.length?pages[pages.length-1].p:0)+1;
-  if(start>1&&start<=N)genSt({msg:`نكمل من الصفحة ${toAr(start)}…`});
+  const pages=(saved&&saved.pages)||[];const done=(saved&&saved.done)||0;const genUpTo=(saved&&saved.gen)||0,madeBefore=(saved&&saved.made)||0;let start=Math.max(done,pages.length?pages[pages.length-1].p:0)+1;
+  if(start>1&&start<=N)genSt({msg:`نكمل من الصفحة ${toAr(start)}…`});else if(start>N&&genUpTo>=N){try{await IDB.set(key,null)}catch(e){}start=1;pages.length=0}
   genSt({total:N,page:start-1});
   for(let i=start;i<=N;i++){if(V.gen.stop)break;
    genSt({page:i-1,msg:`قراءة الصفحة ${toAr(i)} من ${toAr(N)}…`});
    let t='';try{const pg=await doc.getPage(i);t=await genPageText(pg,lang);try{pg.cleanup()}catch(e){}}catch(e){if(/أداة قراءة الصور/.test(e.message||''))throw e}
    if(t)pages.push({p:i,text:t.slice(0,12000)});
-   try{await IDB.set(key,{pages,done:i})}catch(e){}
+   try{await IDB.set(key,{pages,done:i,gen:genUpTo,made:madeBefore})}catch(e){}
    if(i%15===0){try{await doc.cleanup()}catch(e){}if(TESSW){try{await TESSW.w.terminate()}catch(e){}TESSW=null}}
    await gIdle()}
   genSt({page:V.gen.stop?V.gen.page:N,msg:'يكتب الأسئلة…'});await gIdle();
-  const C=genMine(pages,us,en,KW);let qs=genBuild(C,target,en);
+  const C=genMine(pages,us,en,KW);const upto=V.gen.stop?(V.gen.page||0):N;let qs=genBuild(C,Math.max(0,target-madeBefore),en,genUpTo);
   const list=admParseBulk(genLines(qs),{grades:[g],sub:s,unit:'أسئلة الكتاب',les:null});const {fresh,dup}=impSplit(list,g,s);
   let msg;
   if(!fresh.length)msg=pages.length?'ما لگيت جمل تنفع أسئلة بهالكتاب (أو كلها موجودة أصلاً). إذا الكتاب مصوّر وغير واضح، النتيجة تكون قليلة.':'ما گدرت أقرا الكتاب.';
   else if(A.genRev){A.imp=((A.imp||'').trim()+'\n'+genLines(fresh)).trim();msg=`لگيت ${toAr(fresh.length)} سؤال ونزلن بالمربع تحت. راجعهن واضغط «أضف».`}
   else{const n=await genSave(fresh);admRebuild();try{IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}catch(e){}msg=`انضافت ${toAr(n)} سؤال من الكتاب ✓ تلگاها بالأسئلة ← «🪄 مولّدة من الكتاب».`}
   if(dup)msg+=` (تخطيت ${toAr(dup)} مكرر)`;
-  if(V.gen.stop)msg='وگف عند الصفحة '+toAr(V.gen.page||0)+'. '+msg+' ارفع نفس الكتاب حتى يكمل الباقي.';
+  if(genUpTo)msg=`أسئلة الصفحات ${toAr(genUpTo)} وقبلها انضافت سابقاً، فهاي من الصفحات الجديدة بس. `+msg;
+  if(V.gen.stop){const lastRead=pages.length?pages[pages.length-1].p:genUpTo;try{await IDB.set(key,{pages,done:lastRead,gen:Math.max(genUpTo,lastRead),made:madeBefore+fresh.length})}catch(e){}msg='وگف عند الصفحة '+toAr(lastRead)+'. '+msg+' ارفع نفس الكتاب حتى يكمل الباقي — ما راح يكرر اللي انضاف.'}
   else{try{IDB.set(key,null)}catch(e){}}
   V.gen.busy=0;genSt({msg,err:!fresh.length})
  }catch(e){V.gen.busy=0;genSt({msg:'خطأ: '+(e.message||e)+' — ارفع نفس الكتاب ويكمل من وين وگف.',err:1})}
