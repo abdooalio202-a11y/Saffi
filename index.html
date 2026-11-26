@@ -1226,6 +1226,16 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .smore{width:100%;margin-top:4px}
 .dupc{display:flex;gap:12px;align-items:center;justify-content:space-between;background:rgba(242,153,74,.12);border:1px solid rgba(242,153,74,.45);border-radius:16px;padding:12px 14px;margin:0 0 12px}
 .dupc b{display:block;font-size:14.5px;color:var(--ink)}.dupc small{display:block;color:var(--ink2);font-size:12px;margin-top:3px;line-height:1.6}.dupc .btnp{flex:none;width:auto;padding:10px 14px;margin:0}
+
+/* ui19 المولّد */
+.genc{border:1.5px solid rgba(91,77,255,.35)}
+.genst{display:flex;gap:10px;margin-top:8px}.genst span{flex:1;text-align:center;background:var(--surface2);border-radius:12px;padding:8px;font:700 13.5px inherit;color:var(--ink)}
+.genup{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;cursor:pointer}
+.genbk{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.genbk span{background:var(--surface2);border-radius:999px;padding:4px 10px;font-size:12px;color:var(--ink2)}
+.genlog{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}.genlog small{color:var(--ink3);font-size:12px}
+.genlog div{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:center;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}.genlog span{color:var(--ink3)}.genlog b{color:#12B886}.genlog em{font-style:normal;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.genq{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;width:100%;margin:0 0 12px;padding:16px 18px;border-radius:18px;cursor:pointer;color:#fff;background:linear-gradient(135deg,#3d2bd6,#13265e);font-size:20px}
+.genq b{font-size:16px}.genq small{opacity:.85;font-size:12.5px}
 </style>
 </head>
 <body>
@@ -5529,7 +5539,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٠)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٣)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -5586,7 +5596,7 @@ function adQs(){
  let rows=adAllItems();
  if(F.u!=='')rows=rows.filter(r=>r.ui==+F.u);if(F.l!=='')rows=rows.filter(r=>r.li==+F.l);
  if(F.k)rows=rows.filter(r=>r.x.k===F.k);
- if(F.src==='adm')rows=rows.filter(r=>r.x.adm);else if(F.src==='book')rows=rows.filter(r=>!r.x.adm);else if(F.src==='wz')rows=rows.filter(r=>r.x.wz);
+ if(F.src==='adm')rows=rows.filter(r=>r.x.adm);else if(F.src==='book')rows=rows.filter(r=>!r.x.adm);else if(F.src==='wz')rows=rows.filter(r=>r.x.wz);else if(F.src==='ai'){const ai=new Set(ADM.qs.filter(q=>q.ai).map(q=>q.id));rows=rows.filter(r=>r.x.adm&&ai.has(r.x.adm))}
  if(F.q){const t=nz(F.q);rows=rows.filter(r=>nz((r.x.q||'')+' '+(r.x.text||'')+' '+(r.x.m||'')).includes(t))}
  const per=30,pages=Math.max(1,Math.ceil(rows.length/per));if(F.pg>=pages)F.pg=0;const pg=rows.slice(F.pg*per,F.pg*per+per);
  const hidden=(ADM.cfg.hideQ||[]).filter(h=>h.startsWith(A.s+'|'));
@@ -5594,7 +5604,7 @@ function adQs(){
  <select class="inp sel" onchange="V.ad.f.u=this.value;V.ad.f.l='';V.ad.f.pg=0;render()"><option value="">كل الفصول</option>${us.map((u,i)=>`<option value="${i}" ${F.u==i&&F.u!==''?'selected':''}>${esc(u.n)}</option>`).join('')}</select>
  ${F.u!==''&&us[+F.u]&&us[+F.u].ls.length>1?`<select class="inp sel" onchange="V.ad.f.l=this.value;V.ad.f.pg=0;render()"><option value="">كل المواضيع</option>${us[+F.u].ls.map((l,i)=>`<option value="${i}" ${F.l==i&&F.l!==''?'selected':''}>${esc(l.n)}</option>`).join('')}</select>`:''}
  <select class="inp sel" onchange="V.ad.f.k=this.value;V.ad.f.pg=0;render()"><option value="">كل الأنواع</option>${Object.keys(KNAME).map(k=>`<option value="${k}" ${F.k===k?'selected':''}>${KNAME[k]}</option>`).join('')}</select>
- <select class="inp sel" onchange="V.ad.f.src=this.value;V.ad.f.pg=0;render()">${[['','كل المصادر'],['book','من المنهج'],['adm','أضفتها أنا'],['wz','وزاري']].map(o=>`<option value="${o[0]}" ${F.src===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>
+ <select class="inp sel" onchange="V.ad.f.src=this.value;V.ad.f.pg=0;render()">${[['','كل المصادر'],['book','من المنهج'],['adm','أضفتها أنا'],['wz','وزاري'],['ai','🪄 مولّدة من الكتاب']].map(o=>`<option value="${o[0]}" ${F.src===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div>
  <div class="adpick"><input class="inp" placeholder="ابحث بنص السؤال أو الجواب…" value="${esc(F.q)}" onchange="V.ad.f.q=this.value;V.ad.f.pg=0;render()"><button class="btnp" style="width:auto;padding:10px 16px" onclick="admNew()">${I('edit',16)} سؤال جديد</button></div>
  <div class="adbar"><span>${toAr(rows.length)} سؤال</span>${hidden.length?`<button class="chip" onclick="admHiddenSheet()">${toAr(hidden.length)} مخفي — استرجاع</button>`:''}</div>
  ${(()=>{const ids=[...new Set(rows.filter(r=>r.x.adm).map(r=>r.x.adm))];V.ad.bulk=ids;return ids.length?`<div class="cfg adbulk"><div class="cfgh"><b>${toAr(ids.length)} سؤال مضاف بهذا الفلتر</b></div><p class="muted2">إذا ضفت أسئلة بالغلط لمادة ثانية، انقلها كلها للمادة الصحيحة أو احذفها مرة وحدة. (تقدر تحدد فصل معين من الفلتر فوق)</p>
@@ -7136,7 +7146,7 @@ function dedupeCUR(){
    out.push(nu)});
   if(arr.real)out.real=true;CUR[gk][s]=out}
 }
-(function(){const _aa=applyAdmin;applyAdmin=function(){_aa.apply(this,arguments);try{dedupeCUR()}catch(e){console.warn('dedupe',e)}}})();
+(function(){const _aa=applyAdmin;applyAdmin=function(){_aa.apply(this,arguments);try{if(typeof injectExtra==='function')injectExtra()}catch(e){console.warn('extra',e)}try{dedupeCUR()}catch(e){console.warn('dedupe',e)}}})();
 
 /* مفاتيح كل الأسئلة الموجودة لمادة وصف (المنهج + المضافة) */
 function existKeys(gk,s){const K=new Set();(unitsFor(gk,s)||[]).forEach(u=>u.q.forEach(x=>{const k=dKey(x);if(k)K.add(k)}));
@@ -7237,6 +7247,172 @@ searchV=function(){sState();return `<div class="top"><button class="back" style=
  <div class="pad"><div class="sbox">🔍<input id="sqi" type="search" enterkeyhint="search" autocomplete="off" placeholder="ابحث بكل أسئلة صفّك…" value="${esc(V.sq||'')}" oninput="clearTimeout(V.sqt);V.sq=this.value;V.spg=1;V.sqt=setTimeout(()=>{sRefresh();clearTimeout(V.sqr);V.sqr=setTimeout(()=>sRemember(V.sq),1500)},220)" onkeydown="if(event.key==='Enter'){sRemember(this.value);this.blur()}">${V.sq?`<button class="sclr" onclick="sPut('');document.getElementById('sqi').focus()">✕</button>`:''}</div>
  <div id="sfl">${sFiltersHTML()}</div>
  <div id="sres">${searchResHTML()}</div><div style="height:90px"></div></div>`};
+/* =====================================================================
+   ui18 — أسئلة جاهزة مدمجة بالموقع (من الكتب والوزاري) تطلع لكل الطلاب بدون رفع
+   ===================================================================== */
+let EXTRA=null,EXTXT='';const EXV='21';
+function extraParse(){if(EXTRA)return EXTRA;EXTRA=[];if(!EXTXT)return EXTRA;let cur=null;
+ EXTXT.split('\n').forEach(L=>{if(/^#[a-z0-9,]+ [a-z]+\s*$/.test(L)){const p=L.slice(1).trim().split(' ');cur={gs:p[0].split(','),s:p[1],lines:[]};EXTRA.push(cur);return}if(cur)cur.lines.push(L)});
+ EXTRA.forEach(b=>{b.items=admParseBulk(b.lines.join('\n'),{grades:b.gs,sub:b.s,unit:'أسئلة إضافية',les:null});delete b.lines});return EXTRA}
+function injectExtra(){const X=extraParse();if(!X.length)return;const C=ADM.cfg||{};const H=new Set(C.hideQ||[]);
+ X.forEach(b=>b.gs.forEach(gk=>{const arr=CUR[gk]&&CUR[gk][b.s];if(!arr||!GR[gk]||!(GR[gk].subs||[]).includes(b.s))return;
+  const own=new Set();
+  const getU=n=>{const k=NK(n);let i=arr.findIndex(u=>NK(u.n)===k);if(i<0){arr.push({n,gen:[],q:[],ls:[],_own:1});i=arr.length-1;own.add(arr[i])}
+   if(!own.has(arr[i])){const u=arr[i];arr[i]=Object.assign({},u,{_own:1,q:u.q.slice(),gen:u.gen.slice(),ls:u.ls.map(l=>Object.assign({},l,{q:l.q.slice(),gen:(l.gen||[]).slice()}))});own.add(arr[i])}return arr[i]};
+  const getL=(u,n)=>{if(!u.ls.length)u.ls.push({n:u.n,q:[],gen:[],implicit:1});if(!n)return u.ls[0];const k=NK(n);let l=u.ls.find(x=>NK(x.n)===k);if(!l){l={n,q:[],gen:[]};u.ls.push(l)}return l};
+  b.items.forEach(q=>{const txt=q.q||q.text;if(H.has(b.s+'|'+txt))return;const u=getU(q.unit||'أسئلة إضافية');const l=getL(u,q.les);const it=admItem(q);it.bk=1;u.q.push(it);l.q.push(it)})}))}
+
+/* الملف ينزل بالخلفية بعد ما يفتح الموقع، وينحفظ بالجهاز حتى المرات الجاية يطلع فوراً */
+async function extraLoad(){try{const c=await IDB.get('extra');if(c&&c.v===EXV&&c.t){EXTXT=c.t;EXTRA=null;return 'cache'}}catch(e){}return null}
+async function extraFetch(){try{const r=await fetch('extra.txt?v='+EXV);if(!r.ok)return false;const t=await r.text();if(!t||t.length<100)return false;EXTXT=t;EXTRA=null;IDB.set('extra',{v:EXV,t});return true}catch(e){return false}}
+/* =====================================================================
+   ui19 — مولّد الأسئلة من كتاب المنهج (مجاني — بدون ذكاء اصطناعي)
+   يقرا الكتاب داخل الجهاز (النص، أو قراءة الصور للكتب الممسوحة) ويطلّع منه:
+   تعاريف، اختيارات، صح وخطأ، فراغات، تعليل، «ماذا يسمى» — كلها من جمل الكتاب نفسها
+   ===================================================================== */
+V.gen=V.gen||{};
+function genSt(o){Object.assign(V.gen,o);if(V.scr==='admin'&&V.ad&&V.ad.t==='import'){const el=document.getElementById('genbox');if(el)el.outerHTML=genCardHTML();else{const y=scrollY;render();scrollTo(0,y)}}}
+function genKey(f){const A=V.ad;return 'genq_'+A.g+'_'+A.s+'_'+f.name+'_'+f.size}
+let GEN_WL=null;async function genWake(on){try{if(on&&navigator.wakeLock)GEN_WL=await navigator.wakeLock.request('screen');else if(!on&&GEN_WL){GEN_WL.release();GEN_WL=null}}catch(e){}}
+
+function genCardHTML(){const A=V.ad,G=V.gen;const sub=SUB[A.s]?SUB[A.s].n:'',gn=GR[A.g]?GR[A.g].n:'';
+ const pc=G.total?Math.round((G.page||0)/G.total*100):0;
+ return `<div class="cfg genc" id="genbox"><div class="cfgh"><b>🪄 مولّد الأسئلة من كتاب المنهج <span class="genfree">مجاني</span></b></div>
+ <p class="muted2">ارفع <b>كتاب ${esc(sub)} — ${esc(gn)} كامل</b> (PDF). الموقع يقرا الكتاب بالجهاز نفسه ويطلّع منه أسئلة <b>من جمل الكتاب حصراً</b>: تعاريف، اختيارات، صح وخطأ، فراغات، تعليل. (غيّر الصف والمادة من فوق)</p>
+ ${G.busy?`<div class="pdfp"><div class="prog"><i style="width:${pc}%"></i></div><small>${esc(G.msg||'')}</small></div>
+  <div class="genst"><span>📄 ${toAr(G.page||0)} / ${toAr(G.total||0)} صفحة</span><span>💡 ${toAr(G.found||0)} سؤال لگيناه</span></div>
+  <p class="muted2" style="margin-top:6px">خلي الشاشة مفتوحة. الكتب المصوّرة (سكانر) أبطأ لأن الموقع يقرا كل صفحة كصورة.</p>
+  <button class="btns" onclick="V.gen.stop=1;genSt({msg:'دا يوگف ويحفظ اللي لگاه…'})">⏹ وگّف واحفظ اللي لگيته</button>`
+ :`<div class="adkv"><span>أكثر عدد أسئلة من الكتاب</span><input class="inp" type="number" min="20" max="5000" style="max-width:110px" value="${A.genN||1000}" onchange="V.ad.genN=Math.max(20,Math.min(5000,+this.value||1000))"></div>
+  <label class="ck"><input type="checkbox" ${A.genRev?'checked':''} onchange="V.ad.genRev=this.checked"><span>نزّلها بالمربع حتى أراجعها قبل الإضافة (بدل ما تنضاف مباشرة)</span></label>
+  <label class="genup btnp">📚 اختار الكتاب (PDF)<input type="file" accept="application/pdf" style="display:none" onchange="genBook(this.files[0]);this.value=''"></label>
+  ${G.msg?`<div class="note ${G.err?'':'ok'}" style="margin:10px 0 0">${esc(G.msg)}</div>`:''}`}
+ </div>`}
+
+/* ---------- قراءة الصفحة: نص، وإذا صورة نقراها بـ Tesseract (مجاني داخل المتصفح) ---------- */
+let TESS=null,TESSW=null;
+function loadTess(){if(TESS)return Promise.resolve(TESS);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>{TESS=window.Tesseract;res(TESS)};s.onerror=()=>rej(new Error('ما گدرت أحمّل أداة قراءة الصور — تأكد من الإنترنت'));document.head.appendChild(s)})}
+async function tessWorker(lang){if(TESSW&&TESSW.lang===lang)return TESSW.w;if(TESSW){try{await TESSW.w.terminate()}catch(e){}}const T=await loadTess();const w=await T.createWorker(lang);TESSW={w,lang};return w}
+async function genPageText(pg,lang){const tc=await pg.getTextContent();
+ const lines=[];let cur='';tc.items.forEach(x=>{cur+=x.str+(x.hasEOL?'\n':' ')});const text=cur.replace(/[ \t]+/g,' ').trim();
+ const okText=text.replace(/\s/g,'').length>80&&!/[ﭐ-﻿]{5,}/.test(text)&&(lang==='eng'?/[a-z]{3}/i.test(text):/[ء-ي]{3}/.test(text));
+ if(okText)return text;
+ const vp=pg.getViewport({scale:1});const sc=Math.min(2.2,1700/vp.width);const v2=pg.getViewport({scale:sc});const c=document.createElement('canvas');c.width=v2.width;c.height=v2.height;
+ await pg.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;
+ const w=await tessWorker(lang);const r=await w.recognize(c);c.width=c.height=0;return (r&&r.data&&r.data.text)||''}
+
+/* ---------- استخراج الأسئلة من النص ---------- */
+const GSTOP=/^(و|ثم|ان|إن|أن|كما|لذلك|لذا|هذه|هذا|ذلك|تلك|التي|الذي|عند|عندما|إذا|اذا|لكن|ولكن|حيث|بينما|أما|اما|من|في|على|إلى|الى|عن|مع|كل|بعض|قد|لقد|لا|ما|هل|يمكن|نلاحظ|لاحظ|شكل|الشكل|نشاط|سؤال|س|ج|مثال)$/;
+const GORD={'الاول':'١','الأول':'١','الثاني':'٢','الثالث':'٣','الرابع':'٤','الخامس':'٥','السادس':'٦','السابع':'٧','الثامن':'٨','التاسع':'٩','العاشر':'١٠','الحادي عشر':'١١','الثاني عشر':'١٢'};
+function gClean(s){return String(s||'').replace(/[‎‏‪-‮]/g,'').replace(/[|©®»«]/g,' ').replace(/\s+/g,' ').replace(/^[\s\-–•*▪●○◦،,.:؛"']+/,'').trim()}
+const GLIST=/^\s*(?:[0-9٠-٩]{1,2}|[أابجدهوز؟?]|ـ)\s*[-–)\/.]\s*|^\s*[0-9٠-٩]\s+(?=[ء-ي])/;
+const GIMP=/^(فسر|فسّر|صف|اذكر|أذكر|عدد|عدّد|وضح|وضّح|علل|علّل|قارن|ارسم|بين|بيّن|ماذا|ما|لماذا|كيف|هل|اكتب|أكمل|اكمل|املأ|املا|اختر|ضع|عرف|عرّف|اشرح|لاحظ|تأمل|ناقش|استنتج|صنف|صنّف|حدد|حدّد|سم|سمّ|أعط|اعط|اجب|أجب|عزيزي|تستطيع|ستكون|تذكر|تتعرف|تعدد|تبين|تقدر)\s/;
+const GFUNC=/(^|\s)(هناك|عبارة|يكون|تكون|كان|كانت|وهي|وهو|هي|هو|التي|الذي|إذ|اذ|حيث|أن|ان|قد|لا|ما|يتم|تتم|يمكن|عند|عندما)(\s|$)/;
+const GWB=(s,t)=>{const re=new RegExp('(^|[\\s(«"])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[\\s.,،؛:)»"؟])');const m=re.exec(s);return m?m.index+m[1].length:-1};
+function gTidy(s){s=gClean(s);for(let i=0;i<3;i++)s=s.replace(GLIST,'');
+ s=s.replace(/\s*\(([^()]{0,60})\)\s*/g,(m,c)=>{const ar=(c.match(/[ء-ي]{3,}/g)||[]).length;const junk=/[A-Za-z0-9؟?]/.test(c)&&!/^[A-Za-z ]{3,}$/.test(c.trim());return (ar&&!junk)?' ('+c.trim()+') ':' '}).replace(/\(\s*\(|\)\s*\)/g,'');
+ return s.replace(/\s+/g,' ').replace(/\s+([:،,.؟])/g,'$1').trim()}
+const GBAN=/^(الأعراض|الاعراض|الوقاية|العلاج|الأسباب|الاسباب|المسبب|السبب|طرق الانتقال|طريقة الانتقال|مثال|أمثلة|ملاحظة|فكر معي|الجواب|الحل|الاهداف|الأهداف|مقدمة|ويشمل|وتشمل|يشمل|تشمل|منها|ومنها|هي|هو|اي|أي|التشخيص|المضاعفات|النتيجة|الخلاصة|الاستنتاج|المواد|الأدوات|الادوات|خطوات العمل|نشاط|شكل|جدول|تجربة|ماذا تستنتج|سؤال|فسر العبارتين الآتيتين|فسر|علل|اذكر|عدد|وضح|قارن)$/;
+function gArOK(s,en){const L=s.replace(/\s/g,'').length;if(L<4)return false;if(/[0-9٠-٩][ء-يA-Za-z]|[ء-يA-Za-z][0-9٠-٩]/.test(s.replace(/\b(CO2|H2O|O2|H2|N2)\b/g,'')))return false;if(en){const a=(s.match(/[A-Za-z]/g)||[]).length;return a>=.6*L}
+ const a=(s.match(/[ء-ي]/g)||[]).length,l=(s.match(/[A-Za-z]/g)||[]).length,j=(s.match(/[^ء-يA-Za-z0-9٠-٩\s.,،؛:؟?!()«»"'\-–/%+=×÷]/g)||[]).length;return a>=.6*(a+l)&&j<=2&&!/(.)\1{3,}/.test(s.replace(/\./g,''))}
+function gTermOK(t,en){t=gTidy(t);if(!en&&GBAN.test(t))return false;if(/^(الفصل|الوحدة|الدرس|فصل|وحدة|unit|lesson|chapter)(\s|$)/i.test(t))return false;if(!en&&t.split(/\s+/).length>1&&GFUNC.test(t))return false;if(/[:؟?]/.test(t))return false;const w=t.split(/\s+/);if(!t||w.length>5||t.length<2||t.length>45)return false;if(!en&&GSTOP.test(w[0]))return false;if(/[0-9٠-٩]{2,}/.test(t))return false;return gArOK(t,en)}
+function gUnitOf(line,us){const m=line.match(/^(?:ال)?(فصل|وحدة|الفصل|الوحدة)\s+(الحادي عشر|الثاني عشر|[^\s:]+)/);if(!m)return null;let n=m[2].replace(/^ال/,'ال');const d=GORD[m[2]]||GORD['ال'+m[2]]||m[2].replace(/[0-9]/g,x=>'٠١٢٣٤٥٦٧٨٩'[x]);
+ const kind=/وحد/.test(m[1])?'الوحدة':'الفصل';const u=us.find(x=>{const k=NK(x);return k.startsWith(NK(kind+' '+d)+' ')||k===NK(kind+' '+d)||k.startsWith(NK(kind+' '+m[2])+' ')});return u||null}
+function gUnitEn(line,us){const m=line.match(/^\s*unit\s+(\d+|one|two|three|four|five|six|seven|eight)\b/i);if(!m)return null;const u=us.find(x=>new RegExp('^\\s*unit\\s*'+m[1]+'\\b','i').test(x));return u||null}
+
+function gUnitKW(gk,s){const out=[];(unitsFor(gk,s)||[]).forEach(u=>{const w=new Set();[u.n].concat(u.ls.map(l=>l.n)).forEach(n=>NK(n).split(' ').forEach(x=>{if(x.length>=4&&!/^(الفصل|الوحده|الفصول|درس|الدرس|unit|lesson)$/.test(x))w.add(x)}));out.push({n:u.n,w:[...w]})});return out}
+function genMine(pages,us,en,KW){ // pages: [{p,text}] → قوائم مرشحة
+ const C={def:[],name:[],why:[],fn:[],sent:[]};let unit=null;
+ pages.forEach(({p,text})=>{
+  const rawLines=String(text).split('\n').map(gClean).filter(Boolean);
+  if(KW&&KW.length){const T=' '+NK(text)+' ';let best=null,bs=0;KW.forEach(u=>{let sc=0;u.w.forEach(x=>{let i=-1,c=0;while((i=T.indexOf(x,i+1))>=0&&c<20)c++;sc+=c});if(sc>bs){bs=sc;best=u.n}});if(best&&bs>=4)unit=best}
+  let buf='';const flushBuf=()=>{if(!buf)return;buf.split(en?/(?<=[.!?])\s+/:/(?<=[.؟!؛])\s+|\s(?=\d+[-–)]\s)|\s(?=[٠-٩]+[-–)]\s)/).forEach(s=>{s=gTidy(s).replace(/[.؛]$/,'');if(s.length>=12&&s.length<=320&&gArOK(s,en)&&!(en?/\?$/.test(s):(GIMP.test(s+' ')||/[؟?]$/.test(s))))C.sent.push({s,unit,p})});buf=''};
+  rawLines.forEach(L=>{const un=en?gUnitEn(L,us):gUnitOf(L,us);if(un&&L.length<80&&!(KW&&KW.length)){flushBuf();unit=un;return}
+   // سطر قصير بلا فعل = عنوان → نفصل الجمل
+   if(L.length<35&&!/[.؟!:]$/.test(L)){flushBuf();buf=L+' :';flushBuf();return}
+   buf+=(buf?' ':'')+L;if(/[.؟!]$/.test(L))flushBuf()});
+  flushBuf()});
+ const seen=new Set();
+ const dOK=d=>{const r=gClean(d);if(/^[0-9٠-٩]/.test(r)||GLIST.test(r)||/\s[0-9٠-٩]\s+[ء-ي]/.test(r)||/:/.test(r)||/(^|\s)(إذ|اذ|التي|الذي|ما|من|في|و|على|عن|إلى|الى)$/.test(r.replace(/[.؟]$/,'')))return false;d=gTidy(d);return d.length>=12&&d.split(/\s+/).length>=3&&d.split(/\s+/).length<=40&&gArOK(d,en)};
+ const push=(arr,o)=>{o.t=gTidy(o.t);if(o.d!==undefined){if(!dOK(o.d))return;o.d=gTidy(o.d)}arr.push(o)};
+ C.sent.forEach(({s,unit,p})=>{const k=NK(s).slice(0,80);if(seen.has(k))return;seen.add(k);let m;
+  if(en){
+   if((m=s.match(/^(?:the\s+|a\s+|an\s+)?([A-Za-z][A-Za-z\- ]{1,35}?)\s+(?:is|are|means|refers to)\s+((?:a|an|the|when|how|what|something|someone|people|places?)\b.{8,200})$/i))&&gTermOK(m[1],1))push(C.def,{t:m[1],d:m[2],s,unit,p});
+   return}
+  // ١) المصطلح: التعريف
+  if((m=s.match(/^([^:،,]{2,45}?)\s*[:：]\s*(.{15,260})$/))&&gTermOK(m[1])&&!/(مثل|منها|يأتي|الآتي|التالي|الآتية|التالية)$/.test(m[1]))push(C.def,{t:m[1],d:m[2],s,unit,p});
+  // ٢) X هو/هي/هم ...
+  else if((m=s.match(/^(.{2,45}?)\s+(?:هو|هي|هما|هم|عبارة عن)\s+(.{15,260})$/))&&gTermOK(m[1]))push(C.def,{t:m[1],d:m[2].replace(/^عبارة عن\s+/,''),s,unit,p});
+  // ٣) تعرف X بأنها Y
+  else if((m=s.match(/^(?:يعرف|يُعرف|تعرف|تُعرف|يعرّف|تعرّف)\s+(.{2,45}?)\s+(?:بأنه|بانه|بأنها|بانها|على أنه|على انه|على أنها|على انها)\s+(.{12,260})$/))&&gTermOK(m[1]))push(C.def,{t:m[1],d:m[2],s,unit,p});
+  // ٤) ... ويسمى X
+  if((m=s.match(/^(.{15,220}?)[،,]?\s+(?:وتسمى|ويسمى|تسمى|يسمى|وتدعى|ويدعى|ويطلق عليها|ويطلق عليه|يطلق عليه|يطلق عليها|وتعرف ب|ويعرف ب)\s*(?:اسم\s+)?(?:بـ|ب)?\s*[«"(]?([^»")،,.]{2,40})[»")]?$/))&&gTermOK(m[2])){if(!/[:]/.test(m[1])&&m[1].split(/\s+/).length<=30)push(C.name,{t:m[2],d:m[1],s,unit,p})};
+  // ٥) تعليل: ... لأن/بسبب ...
+  if((m=s.match(/^(.{15,200}?)[،,]?\s+(?:وذلك\s+|وهذا\s+|ذلك\s+)?(لأن|لان|لأنه|لانه|لأنها|لانها|بسبب|نتيجة ل|نتيجة)\s+(.{8,220})$/))){const q=gTidy(m[1]);if(q.split(/\s+/).length>=4&&!/^(و|ف)?(فضلا|فضلاً|كذلك|لذلك|هذا|هذه|هي|هو|هم|ذلك|إضافة|اضافة|كما|يسمى|تسمى|بينما|حيث)/.test(q)&&!/(^|\s)(فهي|فهو|وهي|وهو)\s/.test(q.split(/\s+/).slice(0,5).join(' ')+' ')&&!/[:]/.test(q)&&gArOK(q,en))C.why.push({q,a:gTidy(m[2]+' '+m[3]),unit,p})};
+  // ٦) وظيفة: يعمل X على / وظيفة X
+  if((m=s.match(/^(?:وظيفة|من وظائف|تتمثل وظيفة)\s+(.{2,40}?)\s+(?:هي|هو)?\s*(.{10,220})$/))&&gTermOK(m[1]))push(C.fn,{t:m[1],d:m[2],unit,p})});
+ return C}
+
+function gShuf(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function genBuild(C,target,en){const out=[];const terms=[...new Map(C.def.concat(C.name).map(x=>[NK(x.t),x])).values()];
+ const others=(t,unit)=>{const same=terms.filter(x=>NK(x.t)!==NK(t)&&x.unit===unit),all=terms.filter(x=>NK(x.t)!==NK(t));return gShuf((same.length>=3?same:all).slice()).slice(0,3).map(x=>x.t)};
+ const W=s=>s.split(/\s+/).length;
+ const L={def:[],mcq:[],tf:[],b:[],why:[],name:[],fn:[]};
+ C.def.forEach(x=>{L.def.push({k:'def',q:x.t,m:x.d,unit:x.unit});
+  const o=others(x.t,x.unit);if(o.length===3&&x.d.split(/\s+/).length<=35)L.mcq.push({k:'mcq',q:(en?'Which word means: ':'ما المصطلح الذي يدل على: ')+x.d+(en?'?':'؟'),o:[x.t].concat(o),unit:x.unit});
+  const ts=gTidy(x.s);if(ts.split(/\s+/).length<=30&&!GLIST.test(gClean(x.s))&&!GIMP.test(ts+' ')){if(Math.random()<.5)L.tf.push({k:'tf',q:ts,a:true,unit:x.unit});else{const f=others(x.t,x.unit)[0];const ix=GWB(ts,x.t);if(f&&ix>=0)L.tf.push({k:'tf',q:ts.slice(0,ix)+f+ts.slice(ix+x.t.length),a:false,unit:x.unit})}}});
+ C.name.forEach(x=>{L.name.push({k:'tr',q:(en?'What do we call: ':'ماذا يسمى: ')+x.d+(en?'?':'؟'),m:x.t,unit:x.unit});
+  const o=others(x.t,x.unit);if(o.length===3)L.mcq.push({k:'mcq',q:x.d+(en?' is called:':'، يسمى:'),o:[x.t].concat(o),unit:x.unit})});
+ C.why.forEach(x=>{if(W(x.q)>=3)L.why.push({k:'why',q:x.q,m:x.a,unit:x.unit})});
+ C.fn.forEach(x=>L.fn.push({k:'fn',q:x.t,m:x.d,unit:x.unit}));
+ // فراغات: جملة من الكتاب بيها مصطلح معروف
+ const tl=terms.filter(x=>x.t.length>=3).sort((a,b)=>b.t.length-a.t.length);
+ C.sent.forEach(({s,unit})=>{const n=W(s);if(n<6||n>32)return;if(/:/.test(s.slice(0,40))||GLIST.test(s))return;let ti=-1;const t=tl.find(x=>{ti=GWB(s,x.t);return ti>3});
+  if(t)L.b.push({k:'blank',q:s.slice(0,ti)+'......'+s.slice(ti+t.t.length),a:t.t,unit});
+  else{const m=s.match(/(^|\s)([0-9٠-٩]+(?:[.,][0-9٠-٩]+)?\s*(?:%|كغم|غم|كم|سم|ملم|لتر|مل|درجة|درجات|سنة|سنوات|يوماً|يوما|أيام|ساعة|ساعات|مايكرون|ثانية|ملغم|km|cm|mm|kg|g|m|s|°C))(?=[\s.،,]|$)/);if(m&&n>=8&&s.indexOf(m[2])>5)L.b.push({k:'blank',q:s.replace(m[2],'......'),a:m[2].trim(),unit})}});
+ Object.values(L).forEach(gShuf);
+ const order=['def','b','mcq','tf','why','name','fn'];const seen=new Set();
+ while(out.length<target&&order.some(k=>L[k].length)){for(const k of order){const x=L[k].shift();if(!x)continue;const key=NK(x.q)+'|'+x.k;if(seen.has(key))continue;seen.add(key);out.push(x);if(out.length>=target)break}}
+ return out}
+
+function genLines(qs){const lines=[];let lastU;qs.forEach(q=>{const u=q.unit||'أسئلة الكتاب';if(u!==lastU){lines.push('@'+u);lastU=u}const L=qToLine(q,'',false);if(L)lines.push(L)});return lines.join('\n')}
+
+async function genSave(list){if(!list.length)return 0;
+ if(SB){const rows=list.map(q=>{const r=qToRow(q);r.data.ai='book';return r});let n=0;
+  for(let i=0;i<rows.length;i+=200){const {data,error}=await SB.from('questions').insert(rows.slice(i,i+200)).select();if(error)throw error;data.forEach(r=>ADM.qs.push(rowToQ(r)));n+=data.length}return n}
+ list.forEach(q=>{q.ai='book';q.id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);ADM.qs.push(q)});AST.saveLocal();return list.length}
+
+async function genBook(file){const A=V.ad;if(!file||V.gen.busy)return;
+ if(!/pdf$/i.test(file.type)&&!/\.pdf$/i.test(file.name))return genSt({msg:'لازم يكون الملف PDF.',err:1});
+ const g=A.g,s=A.s,target=A.genN||1000,us=(unitsFor(g,s)||[]).map(u=>u.n),KW=gUnitKW(g,s),key=genKey(file),en=s==='english',lang=en?'eng':'ara';
+ V.gen={busy:1,stop:0,page:0,total:0,found:0,msg:'جاري فتح الكتاب…'};genSt({});genWake(true);
+ try{
+  const lib=await loadPdfJs();const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;const N=doc.numPages;
+  // النص اللي انقرا ينحفظ بالجهاز، فإذا انقطع يكمل من وين وگف
+  let saved=null;try{saved=await IDB.get(key)}catch(e){}
+  const pages=(saved&&saved.pages)||[];let start=pages.length?pages[pages.length-1].p+1:1;
+  if(start>1&&start<=N&&!confirm(`هذا الكتاب انقرا قبل لحد الصفحة ${toAr(start-1)}. تكمل من هناك؟ (لا = يبدي من الأول)`)){pages.length=0;start=1}
+  genSt({total:N,page:start-1});
+  for(let i=start;i<=N;i++){if(V.gen.stop)break;
+   genSt({page:i-1,msg:`قراءة الصفحة ${toAr(i)} من ${toAr(N)}…`});
+   let t='';try{t=await genPageText(await doc.getPage(i),lang)}catch(e){if(/أداة قراءة الصور/.test(e.message||''))throw e}
+   if(t)pages.push({p:i,text:t});
+   if(i%5===0||i===N){try{await IDB.set(key,{pages})}catch(e){}const c=genMine(pages,us,en,KW);genSt({found:c.def.length*3+c.name.length*2+c.why.length+c.fn.length+Math.round(c.sent.length*.3)})}}
+  genSt({msg:'يكتب الأسئلة…'});
+  const C=genMine(pages,us,en,KW);let qs=genBuild(C,target,en);
+  const list=admParseBulk(genLines(qs),{grades:[g],sub:s,unit:'أسئلة الكتاب',les:null});const {fresh,dup}=impSplit(list,g,s);
+  let msg;
+  if(!fresh.length)msg=pages.length?'ما لگيت جمل تنفع أسئلة بهالكتاب (أو كلها موجودة أصلاً). إذا الكتاب مصوّر وغير واضح، النتيجة تكون قليلة.':'ما گدرت أقرا الكتاب.';
+  else if(A.genRev){A.imp=((A.imp||'').trim()+'\n'+genLines(fresh)).trim();msg=`لگيت ${toAr(fresh.length)} سؤال ونزلن بالمربع تحت. راجعهن واضغط «أضف».`}
+  else{const n=await genSave(fresh);admRebuild();try{IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}catch(e){}msg=`انضافت ${toAr(n)} سؤال من الكتاب ✓ تلگاها بالأسئلة ← «🪄 مولّدة».`}
+  if(dup)msg+=` (تخطيت ${toAr(dup)} مكرر)`;if(V.gen.stop)msg='وگف عند الصفحة '+toAr(V.gen.page||0)+'. '+msg+' ارفع نفس الكتاب حتى تكمل الباقي.';
+  else{try{IDB.set(key,null)}catch(e){}}
+  V.gen.busy=0;genSt({msg,err:!fresh.length})
+ }catch(e){V.gen.busy=0;genSt({msg:'خطأ: '+(e.message||e),err:1})}
+ genWake(false);render()}
+
+(function(){const _ai=adImport;adImport=function(){const h=_ai.apply(this,arguments);const i=h.indexOf('</div>')+6;return h.slice(0,i)+genCardHTML()+h.slice(i)}})();
+(function(){const _d=adDash;adDash=function(){return `<button class="genq" onclick="V.ad.t='import';render()">🪄 <b>ولّد أسئلة من كتاب المنهج — مجاناً</b><small>ارفع كتاب كامل والأسئلة تطلع منه لحالها</small></button>`+_d.apply(this,arguments)}})();
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
@@ -7273,7 +7449,9 @@ async function restLoad(){const base=SBCFG.SUPABASE_URL.replace(/\/$/,'')+'/rest
    let got=false;try{got=await Promise.race([restLoad(),new Promise(r=>setTimeout(()=>r(false),9000))])}catch(e){}
    if(got)IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}
  }
+ const exc=await extraLoad();
  buildCUR();applyTheme();bootRoute();if(/^#c=/.test(location.hash))chalInit();else render();
+ if(!exc)extraFetch().then(ok=>{if(ok){buildCUR();if(V.scr!=='exam'&&V.scr!=='chal')render()}});
  if(HASB){
   const before=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
   await SBP;
