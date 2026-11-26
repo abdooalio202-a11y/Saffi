@@ -5539,7 +5539,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٣)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٤)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -7280,8 +7280,8 @@ function genCardHTML(){const A=V.ad,G=V.gen;const sub=SUB[A.s]?SUB[A.s].n:'',gn=
  return `<div class="cfg genc" id="genbox"><div class="cfgh"><b>🪄 مولّد الأسئلة من كتاب المنهج <span class="genfree">مجاني</span></b></div>
  <p class="muted2">ارفع <b>كتاب ${esc(sub)} — ${esc(gn)} كامل</b> (PDF). الموقع يقرا الكتاب بالجهاز نفسه ويطلّع منه أسئلة <b>من جمل الكتاب حصراً</b>: تعاريف، اختيارات، صح وخطأ، فراغات، تعليل. (غيّر الصف والمادة من فوق)</p>
  ${G.busy?`<div class="pdfp"><div class="prog"><i style="width:${pc}%"></i></div><small>${esc(G.msg||'')}</small></div>
-  <div class="genst"><span>📄 ${toAr(G.page||0)} / ${toAr(G.total||0)} صفحة</span><span>💡 ${toAr(G.found||0)} سؤال لگيناه</span></div>
-  <p class="muted2" style="margin-top:6px">خلي الشاشة مفتوحة. الكتب المصوّرة (سكانر) أبطأ لأن الموقع يقرا كل صفحة كصورة.</p>
+  <div class="genst"><span>📄 ${toAr(G.page||0)} / ${toAr(G.total||0)} صفحة</span><span>💾 ينحفظ أول بأول</span></div>
+  <p class="muted2" style="margin-top:6px">خلي الشاشة مفتوحة والموقع قدامك. إذا الموقع تحدّث أو انقطع، ارفع نفس الكتاب ويكمل من نفس الصفحة. الكتب المصوّرة أبطأ لأن الموقع يقرا كل صفحة كصورة.</p>
   <button class="btns" onclick="V.gen.stop=1;genSt({msg:'دا يوگف ويحفظ اللي لگاه…'})">⏹ وگّف واحفظ اللي لگيته</button>`
  :`<div class="adkv"><span>أكثر عدد أسئلة من الكتاب</span><input class="inp" type="number" min="20" max="5000" style="max-width:110px" value="${A.genN||1000}" onchange="V.ad.genN=Math.max(20,Math.min(5000,+this.value||1000))"></div>
   <label class="ck"><input type="checkbox" ${A.genRev?'checked':''} onchange="V.ad.genRev=this.checked"><span>نزّلها بالمربع حتى أراجعها قبل الإضافة (بدل ما تنضاف مباشرة)</span></label>
@@ -7294,13 +7294,16 @@ let TESS=null,TESSW=null;
 function loadTess(){if(TESS)return Promise.resolve(TESS);return new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>{TESS=window.Tesseract;res(TESS)};s.onerror=()=>rej(new Error('ما گدرت أحمّل أداة قراءة الصور — تأكد من الإنترنت'));document.head.appendChild(s)})}
 async function tessWorker(lang){if(TESSW&&TESSW.lang===lang)return TESSW.w;if(TESSW){try{await TESSW.w.terminate()}catch(e){}}const T=await loadTess();const w=await T.createWorker(lang);TESSW={w,lang};return w}
 async function genPageText(pg,lang){const tc=await pg.getTextContent();
- const lines=[];let cur='';tc.items.forEach(x=>{cur+=x.str+(x.hasEOL?'\n':' ')});const text=cur.replace(/[ \t]+/g,' ').trim();
+ let cur='';tc.items.forEach(x=>{cur+=x.str+(x.hasEOL?'\n':' ')});const text=cur.replace(/[ \t]+/g,' ').trim();
  const okText=text.replace(/\s/g,'').length>80&&!/[ﭐ-﻿]{5,}/.test(text)&&(lang==='eng'?/[a-z]{3}/i.test(text):/[ء-ي]{3}/.test(text));
  if(okText)return text;
- const vp=pg.getViewport({scale:1});const sc=Math.min(2.2,1700/vp.width);const v2=pg.getViewport({scale:sc});const c=document.createElement('canvas');c.width=v2.width;c.height=v2.height;
- await pg.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;
- const w=await tessWorker(lang);const r=await w.recognize(c);c.width=c.height=0;return (r&&r.data&&r.data.text)||''}
-
+ // صفحة مصوّرة: نرسمها بحجم معقول (حتى ما تخلص ذاكرة الموبايل) ونقراها
+ const vp=pg.getViewport({scale:1});const sc=Math.min(1.6,1250/vp.width);const v2=pg.getViewport({scale:sc});
+ const c=document.createElement('canvas');c.width=Math.round(v2.width);c.height=Math.round(v2.height);const cx=c.getContext('2d',{willReadFrequently:true});
+ cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:cx,viewport:v2}).promise;
+ let out='';try{const w=await tessWorker(lang);const r=await w.recognize(c);out=(r&&r.data&&r.data.text)||''}finally{c.width=c.height=1}
+ return out}
+const gIdle=()=>new Promise(r=>setTimeout(r,30));
 /* ---------- استخراج الأسئلة من النص ---------- */
 const GSTOP=/^(و|ثم|ان|إن|أن|كما|لذلك|لذا|هذه|هذا|ذلك|تلك|التي|الذي|عند|عندما|إذا|اذا|لكن|ولكن|حيث|بينما|أما|اما|من|في|على|إلى|الى|عن|مع|كل|بعض|قد|لقد|لا|ما|هل|يمكن|نلاحظ|لاحظ|شكل|الشكل|نشاط|سؤال|س|ج|مثال)$/;
 const GORD={'الاول':'١','الأول':'١','الثاني':'٢','الثالث':'٣','الرابع':'٤','الخامس':'٥','السادس':'٦','السابع':'٧','الثامن':'٨','التاسع':'٩','العاشر':'١٠','الحادي عشر':'١١','الثاني عشر':'١٢'};
@@ -7386,29 +7389,37 @@ async function genBook(file){const A=V.ad;if(!file||V.gen.busy)return;
  if(!/pdf$/i.test(file.type)&&!/\.pdf$/i.test(file.name))return genSt({msg:'لازم يكون الملف PDF.',err:1});
  const g=A.g,s=A.s,target=A.genN||1000,us=(unitsFor(g,s)||[]).map(u=>u.n),KW=gUnitKW(g,s),key=genKey(file),en=s==='english',lang=en?'eng':'ara';
  V.gen={busy:1,stop:0,page:0,total:0,found:0,msg:'جاري فتح الكتاب…'};genSt({});genWake(true);
+ let url=null,doc=null;
  try{
-  const lib=await loadPdfJs();const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;const N=doc.numPages;
-  // النص اللي انقرا ينحفظ بالجهاز، فإذا انقطع يكمل من وين وگف
+  const lib=await loadPdfJs();
+  // نفتح الكتاب قطعة قطعة بدل ما نحمّله كله بالذاكرة
+  url=URL.createObjectURL(file);
+  doc=await lib.getDocument({url,disableAutoFetch:true,disableStream:false,rangeChunkSize:262144,isEvalSupported:false,useSystemFonts:true}).promise;const N=doc.numPages;
+  // كل صفحة تنقرا تنحفظ بالجهاز فوراً، فإذا الموقع تحدّث يكمل من نفس المكان
   let saved=null;try{saved=await IDB.get(key)}catch(e){}
-  const pages=(saved&&saved.pages)||[];let start=pages.length?pages[pages.length-1].p+1:1;
-  if(start>1&&start<=N&&!confirm(`هذا الكتاب انقرا قبل لحد الصفحة ${toAr(start-1)}. تكمل من هناك؟ (لا = يبدي من الأول)`)){pages.length=0;start=1}
+  const pages=(saved&&saved.pages)||[];const done=(saved&&saved.done)||0;let start=Math.max(done,pages.length?pages[pages.length-1].p:0)+1;
+  if(start>1&&start<=N)genSt({msg:`نكمل من الصفحة ${toAr(start)}…`});
   genSt({total:N,page:start-1});
   for(let i=start;i<=N;i++){if(V.gen.stop)break;
    genSt({page:i-1,msg:`قراءة الصفحة ${toAr(i)} من ${toAr(N)}…`});
-   let t='';try{t=await genPageText(await doc.getPage(i),lang)}catch(e){if(/أداة قراءة الصور/.test(e.message||''))throw e}
-   if(t)pages.push({p:i,text:t});
-   if(i%5===0||i===N){try{await IDB.set(key,{pages})}catch(e){}const c=genMine(pages,us,en,KW);genSt({found:c.def.length*3+c.name.length*2+c.why.length+c.fn.length+Math.round(c.sent.length*.3)})}}
-  genSt({msg:'يكتب الأسئلة…'});
+   let t='';try{const pg=await doc.getPage(i);t=await genPageText(pg,lang);try{pg.cleanup()}catch(e){}}catch(e){if(/أداة قراءة الصور/.test(e.message||''))throw e}
+   if(t)pages.push({p:i,text:t.slice(0,12000)});
+   try{await IDB.set(key,{pages,done:i})}catch(e){}
+   if(i%15===0){try{await doc.cleanup()}catch(e){}if(TESSW){try{await TESSW.w.terminate()}catch(e){}TESSW=null}}
+   await gIdle()}
+  genSt({page:V.gen.stop?V.gen.page:N,msg:'يكتب الأسئلة…'});await gIdle();
   const C=genMine(pages,us,en,KW);let qs=genBuild(C,target,en);
   const list=admParseBulk(genLines(qs),{grades:[g],sub:s,unit:'أسئلة الكتاب',les:null});const {fresh,dup}=impSplit(list,g,s);
   let msg;
   if(!fresh.length)msg=pages.length?'ما لگيت جمل تنفع أسئلة بهالكتاب (أو كلها موجودة أصلاً). إذا الكتاب مصوّر وغير واضح، النتيجة تكون قليلة.':'ما گدرت أقرا الكتاب.';
   else if(A.genRev){A.imp=((A.imp||'').trim()+'\n'+genLines(fresh)).trim();msg=`لگيت ${toAr(fresh.length)} سؤال ونزلن بالمربع تحت. راجعهن واضغط «أضف».`}
-  else{const n=await genSave(fresh);admRebuild();try{IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}catch(e){}msg=`انضافت ${toAr(n)} سؤال من الكتاب ✓ تلگاها بالأسئلة ← «🪄 مولّدة».`}
-  if(dup)msg+=` (تخطيت ${toAr(dup)} مكرر)`;if(V.gen.stop)msg='وگف عند الصفحة '+toAr(V.gen.page||0)+'. '+msg+' ارفع نفس الكتاب حتى تكمل الباقي.';
+  else{const n=await genSave(fresh);admRebuild();try{IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}catch(e){}msg=`انضافت ${toAr(n)} سؤال من الكتاب ✓ تلگاها بالأسئلة ← «🪄 مولّدة من الكتاب».`}
+  if(dup)msg+=` (تخطيت ${toAr(dup)} مكرر)`;
+  if(V.gen.stop)msg='وگف عند الصفحة '+toAr(V.gen.page||0)+'. '+msg+' ارفع نفس الكتاب حتى يكمل الباقي.';
   else{try{IDB.set(key,null)}catch(e){}}
   V.gen.busy=0;genSt({msg,err:!fresh.length})
- }catch(e){V.gen.busy=0;genSt({msg:'خطأ: '+(e.message||e),err:1})}
+ }catch(e){V.gen.busy=0;genSt({msg:'خطأ: '+(e.message||e)+' — ارفع نفس الكتاب ويكمل من وين وگف.',err:1})}
+ try{if(doc)doc.destroy()}catch(e){}if(url)URL.revokeObjectURL(url);if(TESSW){try{await TESSW.w.terminate()}catch(e){}TESSW=null}
  genWake(false);render()}
 
 (function(){const _ai=adImport;adImport=function(){const h=_ai.apply(this,arguments);const i=h.indexOf('</div>')+6;return h.slice(0,i)+genCardHTML()+h.slice(i)}})();
