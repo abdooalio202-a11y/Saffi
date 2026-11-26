@@ -1,6 +1,6 @@
 /* صفّي — يخلي الموقع يشتغل كتطبيق وبدون إنترنت.
    الصفحة نفسها: نجيبها من الإنترنت أول (حتى التحديثات تطلع فوراً)، وإذا ماكو إنترنت نفتح النسخة المحفوظة. */
-const CACHE = 'saffi-v1';
+const CACHE = 'saffi-v2';
 const CORE = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -24,13 +24,18 @@ self.addEventListener('fetch', e => {
 
   // فتح الصفحة: من الإنترنت أول، وإذا ماكو نرجع للمحفوظة
   if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put('/index.html', copy));
-        return res;
-      }).catch(() => caches.match('/index.html').then(r => r || caches.match('/')))
-    );
+    // ننتظر الإنترنت ٣ ثواني بس، إذا تأخر نفتح المحفوظة فوراً ونحدّثها بالخلفية
+    const net = fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put('/index.html', copy)); }
+      return res;
+    });
+    const saved = () => caches.match('/index.html').then(r => r || caches.match('/'));
+    e.respondWith(new Promise(resolve => {
+      let done = false;
+      const t = setTimeout(() => saved().then(r => { if (r && !done) { done = true; resolve(r); } }), 3000);
+      net.then(r => { if (!done) { done = true; clearTimeout(t); resolve(r); } })
+         .catch(() => saved().then(r => { if (!done) { done = true; clearTimeout(t); resolve(r || Response.error()); } }));
+    }));
     return;
   }
 

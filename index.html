@@ -13,7 +13,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>صفّي — منصتك الدراسية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@500;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&display=swap"></noscript>
 <style>
 :root{
  --bg:#F3F5FC;--surface:#fff;--surface2:#F5F6FB;--ink:#161937;--ink2:#575D7E;--ink3:#9AA0BD;--line:#E7E9F4;--line2:#D8DBEC;
@@ -1207,6 +1209,23 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .qsta{font:14px/1.9 "IBM Plex Sans Arabic",monospace;min-height:180px}
 .qsprev{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;font-size:12.5px}
 .qsprev b{color:var(--ind)}.qsprev span{background:var(--surface2);border-radius:999px;padding:2px 9px;color:var(--ink2)}.qsprev em{font-style:normal;color:var(--bad);width:100%}
+
+/* ui17 البحث والتكرار */
+.srow{display:flex;gap:7px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none}.srow::-webkit-scrollbar{display:none}
+.sch{flex:none;border:1.5px solid var(--line2);background:var(--surface);color:var(--ink2);border-radius:999px;padding:7px 13px;font:600 13px/1 inherit;cursor:pointer;white-space:nowrap}
+.sch.on{background:var(--sc,var(--nv,#13265e));border-color:var(--sc,var(--nv,#13265e));color:#fff}
+.dark .sch.on{background:var(--sc,#F5B82E);border-color:var(--sc,#F5B82E);color:#fff}
+.ssel{flex:1;min-width:0;border:1.5px solid var(--line2);background:var(--surface);color:var(--ink);border-radius:12px;padding:9px 12px;font:600 14px inherit}
+.sgh{display:flex;justify-content:space-between;align-items:center;font:700 13px inherit;color:var(--ink3);margin:10px 4px 8px}.sgh button{all:unset;color:var(--ind,#5B4DFF);font-size:12.5px;cursor:pointer}
+.snav{display:grid;gap:8px;margin-bottom:6px}.snav button{all:unset;display:flex;flex-direction:column;gap:3px;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 14px 11px 36px;cursor:pointer}
+.snav b{font-size:15px;color:var(--ink)}.snav small{color:var(--ink3);font-size:12px}.snav span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink3)}
+.sres mark,.snav mark{background:rgba(245,184,46,.38);color:inherit;border-radius:4px;padding:0 2px}
+.sshow{all:unset;display:inline-block;margin-top:8px;font:700 12.5px inherit;color:var(--ind,#5B4DFF);cursor:pointer}
+.sans{display:none}.sans.open{display:block}
+.sclr{all:unset;cursor:pointer;color:var(--ink3);padding:4px 6px;font-size:15px}
+.smore{width:100%;margin-top:4px}
+.dupc{display:flex;gap:12px;align-items:center;justify-content:space-between;background:rgba(242,153,74,.12);border:1px solid rgba(242,153,74,.45);border-radius:16px;padding:12px 14px;margin:0 0 12px}
+.dupc b{display:block;font-size:14.5px;color:var(--ink)}.dupc small{display:block;color:var(--ink2);font-size:12px;margin-top:3px;line-height:1.6}.dupc .btnp{flex:none;width:auto;padding:10px 14px;margin:0}
 </style>
 </head>
 <body>
@@ -3920,7 +3939,8 @@ d|الرمزية|مذهب أدبي يعبّر عن المعاني والمشاع
 
 </script>
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://dtvhutacfdfwzlntpuen.supabase.co" crossorigin>
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="window.__sbOK&&window.__sbOK()"></script>
 <script>
 /* ===================== أيقونات ===================== */
 const IC={
@@ -4653,7 +4673,11 @@ function correctText(it){
 
 /* ===================== Supabase ===================== */
 let SB=null;
-try{const C=window.SAFFI_CONFIG||{};if(C.SUPABASE_URL&&C.SUPABASE_ANON_KEY&&window.supabase)SB=window.supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY)}catch(e){}
+const SBCFG=window.SAFFI_CONFIG||{};const HASB=!!(SBCFG.SUPABASE_URL&&SBCFG.SUPABASE_ANON_KEY);
+function sbMake(){try{if(!SB&&HASB&&window.supabase)SB=window.supabase.createClient(SBCFG.SUPABASE_URL,SBCFG.SUPABASE_ANON_KEY)}catch(e){}return SB}
+sbMake();
+/* مكتبة Supabase تنزل بالخلفية حتى ما تأخر فتح الموقع */
+const SBP=new Promise(res=>{if(SB||!HASB)return res(SB);let d=false;const ok=()=>{if(d)return;d=true;res(sbMake())};window.__sbOK=ok;const t=setInterval(()=>{if(window.supabase){clearInterval(t);ok()}},150);setTimeout(()=>{clearInterval(t);ok()},25000)});
 async function saveResult(E){
  if(!SB)return;
  try{await SB.from('exam_results').insert({student_name:S.name||null,grade:E.g.k,grade_name:E.g.n,subject:E.sub,exam_type:E.type,score:E.total,oath:true})}catch(e){console.warn('save failed',e)}
@@ -5410,9 +5434,13 @@ const qToRow=q=>({grades:q.grades,subject:q.sub,unit:q.unit,lesson:q.les||null,k
  data:{q:q.q,o:q.o,a:q.a,m:q.m,kw:q.kw,alts:q.alts,text:q.text,subs:q.subs,ans:q.ans,year:q.year}});
 const rowToQ=r=>Object.assign({id:r.id,grades:r.grades||[],sub:r.subject,unit:r.unit,les:r.lesson,k:r.kind,wz:r.wz,created:r.created_at},r.data||{});
 // Supabase يرجّع 1000 سؤال بالطلب الواحد كحد أقصى، فنجيب الأسئلة على دفعات
-async function admFetchAllQs(){const step=1000;let all=[],from=0;
- for(;;){const {data,error}=await SB.from('questions').select('*').eq('active',true).order('id',{ascending:true}).range(from,from+step-1);
-  if(error)throw error;all=all.concat(data||[]);if(!data||data.length<step)break;from+=step}
+async function admFetchAllQs(){const step=1000;
+ const first=await SB.from('questions').select('*',{count:'exact'}).eq('active',true).order('id',{ascending:true}).range(0,step-1);
+ if(first.error)throw first.error;let all=first.data||[];const tot=first.count||0;
+ if(all.length===step){
+  if(tot>step){const ps=[];for(let f=step;f<tot;f+=step)ps.push(SB.from('questions').select('*').eq('active',true).order('id',{ascending:true}).range(f,f+step-1));
+   for(const r of await Promise.all(ps)){if(r.error)throw r.error;all=all.concat(r.data||[])}}
+  else{let from=step;for(;;){const {data,error}=await SB.from('questions').select('*').eq('active',true).order('id',{ascending:true}).range(from,from+step-1);if(error)throw error;all=all.concat(data||[]);if(!data||data.length<step)break;from+=step}}}
  return all}
 const AST={
  async load(){
@@ -5501,7 +5529,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (١٩)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (٢٠)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -7068,6 +7096,147 @@ function adQsets(){const S=QS();const cur=S.find(s=>s.id===V.ad.qs);
  <div class="cfg"><div class="cfgh"><b>+ ضيف مادة</b></div><select class="inp sel" onchange="qsSubAdd('${s.id}',this.value)"><option value="">— اختار المادة —</option>${Object.keys(SUB).filter(k=>!used.has(k)).map(k=>`<option value="${k}">${esc(SUB[k].n)} (${k})</option>`).join('')}</select></div>
  <div class="pad" style="display:grid;gap:10px;padding:0 0 20px"><button class="btns" onclick="qsTry('${s.id}')">👁️ جرّبها كطالب</button><button class="btns" style="color:var(--bad)" onclick="qsDel('${s.id}')">حذف المجموعة</button></div>`}
 (function(){const _r=render;render=function(){const r=_r.apply(this,arguments);if(V.scr==='admin')document.querySelectorAll('.qsta').forEach(t=>t.dispatchEvent(new Event('input')));return r}})();
+/* =====================================================================
+   ui17 — منع التكرار بكل الموقع + بحث حقيقي بفلاتر
+   ===================================================================== */
+
+/* ---------- مطابقة النصوص العربية (للتكرار والبحث) ---------- */
+function NK(s){return String(s==null?'':s).replace(/\s*\((?:وزاري|وزارية)[^)]*\)/g,'').replace(/<[^>]+>/g,'').replace(/_/g,' ')
+ .replace(/[ً-ٰٟـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+ .replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^ء-يa-zA-Z0-9]+/g,' ').replace(/\s+/g,' ').trim().toLowerCase()}
+function dKey(x){if(!x)return '';if(x._qk!==undefined&&x._qs===(x.q||x.text))return x._qk;const r=dKey0(x);try{x._qk=r;x._qs=(x.q||x.text)}catch(e){}return r}
+function dKey0(x){if(x.k==='psg')return 'p|'+NK(x.text).slice(0,240);const t=NK(x.q||x.text);if(t.length<3)return '';return (x.k==='def'?'d|':'')+t}
+
+/* ---------- ١) تنظيف المنهج من التكرار: فصول ومواضيع بنفس الاسم تندمج، والسؤال يطلع مرة وحدة بكل مادة ---------- */
+function dedupeCUR(){
+ for(const gk in CUR)for(const s in CUR[gk]){const arr=CUR[gk][s];if(!Array.isArray(arr)||!arr.length)continue;
+  // دمج الفصول المكررة
+  const by={},mg=[];
+  arr.forEach(u=>{const n=NK(u.n);const m=by[n];
+   if(!m){by[n]=u;mg.push(u);return}
+   let t=m;if(!t._mg){t=Object.assign({},m,{_mg:1,_own:1,q:m.q.slice(),gen:m.gen.slice(),ls:m.ls.map(l=>Object.assign({},l,{q:l.q.slice(),gen:(l.gen||[]).slice()}))});mg[mg.indexOf(m)]=t;by[n]=t}
+   t.q=t.q.concat(u.q);u.gen.forEach(g=>{if(!t.gen.includes(g))t.gen.push(g)});
+   u.ls.forEach(l=>{const ln=NK(l.n);let tl=t.ls.find(x=>NK(x.n)===ln)||(l.implicit&&t.ls.find(x=>x.implicit));
+    if(tl){tl.q=tl.q.concat(l.q);(l.gen||[]).forEach(g=>{if(!tl.gen.includes(g))tl.gen.push(g)})}
+    else t.ls.push(Object.assign({},l,{q:l.q.slice(),gen:(l.gen||[]).slice()}))})});
+  // دمج المواضيع المكررة داخل نفس الفصل
+  mg.forEach((u,i)=>{const seenL={};let ch=false;const ls=[];u.ls.forEach(l=>{const n=NK(l.n);if(seenL[n]){seenL[n].q=seenL[n].q.concat(l.q);ch=true}else{const c=Object.assign({},l,{q:l.q.slice()});seenL[n]=c;ls.push(c)}});
+   if(ch)mg[i]=Object.assign({},u,{_own:1,ls})});
+  // السؤال المكرر يطلع مرة وحدة
+  const seen=new Map(),keep=new Map();
+  const decide=x=>{if(keep.has(x))return keep.get(x);let ok=true;
+   if(!(x.der||x.gen||x.k==='dna')){const k=dKey(x);if(k){const f=seen.get(k);if(f&&f!==x){ok=false;if(x.wz&&!f.wz)f.wz=true}else seen.set(k,x)}}
+   keep.set(x,ok);return ok};
+  const out=[];
+  mg.forEach(u=>{let rm=false;const ls=u.ls.map(l=>{const q=l.q.filter(decide);if(q.length!==l.q.length)rm=true;return q.length===l.q.length?l:Object.assign({},l,{q,_dd:l.q.length&&!q.length})});
+   const uq=u.q.filter(decide);if(uq.length!==u.q.length)rm=true;
+   if(!rm){out.push(u);return}
+   const nl=ls.filter(l=>!l._dd);const nu=Object.assign({},u,{_own:1,q:uq,ls:nl});
+   if(u.q.length&&!uq.length&&!u.gen.length)return; // صار فاضي بسبب التكرار بس
+   out.push(nu)});
+  if(arr.real)out.real=true;CUR[gk][s]=out}
+}
+(function(){const _aa=applyAdmin;applyAdmin=function(){_aa.apply(this,arguments);try{dedupeCUR()}catch(e){console.warn('dedupe',e)}}})();
+
+/* مفاتيح كل الأسئلة الموجودة لمادة وصف (المنهج + المضافة) */
+function existKeys(gk,s){const K=new Set();(unitsFor(gk,s)||[]).forEach(u=>u.q.forEach(x=>{const k=dKey(x);if(k)K.add(k)}));
+ (ADM.qs||[]).forEach(q=>{if(q.sub===s&&(q.grades||[]).includes(gk)){const k=dKey(q);if(k)K.add(k)}});return K}
+
+/* ---------- ٢) الإضافة الجماعية: يتخطى المكرر تلقائياً ---------- */
+function impSplit(list,gk,s){const K=existKeys(gk,s),inl=new Set(),fresh=[];let dup=0;
+ list.forEach(q=>{const k=dKey(q.k==='psg'?q:q);if(k&&(K.has(k)||inl.has(k))){dup++;return}if(k)inl.add(k);fresh.push(q)});return {fresh,dup}}
+admDoImport=async function(){const A=V.ad;const list=admParseBulk(A.imp,{grades:[A.g],sub:A.s,unit:A.impU,les:A.impL||null});if(!list.length)return;
+ const {fresh,dup}=impSplit(list,A.g,A.s);
+ if(!fresh.length){toast('كل الأسئلة موجودة أصلاً — ما انضاف شي (تخطيت '+toAr(dup)+' مكرر)');return}
+ try{await AST.addQs(fresh);admRebuild();A.imp='';toast('انضافت '+toAr(fresh.length)+' سؤال ✓'+(dup?' · تخطيت '+toAr(dup)+' مكرر':''))}catch(e){toast('خطأ: '+(e.message||e))}render()};
+(function(){const _ai=adImport;adImport=function(){let h=_ai.apply(this,arguments);try{const A=V.ad;if(A.imp&&A.s){const list=admParseBulk(A.imp,{grades:[A.g],sub:A.s,unit:A.impU,les:A.impL||null});const {fresh,dup}=impSplit(list,A.g,A.s);
+  if(dup)h=h.replace(/(تم التعرف على <b>[^<]*<\/b> سؤال)/,`$1 · <b style="color:#F2994A">${toAr(dup)} مكرر راح يتخطى</b>`).replace(/أضف [^<]* سؤال<\/button>/,`أضف ${toAr(fresh.length)} سؤال جديد</button>`)}}catch(e){}return h}})();
+
+/* إضافة سؤال واحد: تنبيه إذا موجود */
+(function(){if(typeof admSaveQ!=='function')return;const _s=admSaveQ;admSaveQ=async function(){try{const f=V.ad&&V.ad.form;if(f&&!f.id&&f.q){const k=dKey(f);const gs=f.grades||[V.ad.g];if(k&&gs.some(g=>existKeys(g,f.sub||V.ad.s).has(k))&&!confirm('هذا السؤال موجود أصلاً. تريد تضيفه مرة ثانية؟'))return}}catch(e){}return _s.apply(this,arguments)}})();
+
+/* ---------- ٣) تنظيف المكرر اللي انضاف قبل ---------- */
+function admDupList(){const seen=new Map(),dup=[];const book=new Map();
+ // أسئلة المنهج الأصلية (مو المضافة)
+ for(const gk in CUR)for(const s in CUR[gk])(CUR[gk][s]||[]).forEach(u=>u.q.forEach(x=>{if(x.adm||x.der||x.gen)return;const k=dKey(x);if(k)book.set(gk+'|'+s+'|'+k,1)}));
+ (ADM.qs||[]).forEach(q=>{const k=dKey(q);if(!k)return;const gs=q.grades||[];
+  const hit=gs.some(g=>seen.has(g+'|'+q.sub+'|'+k)||book.has(g+'|'+q.sub+'|'+k));
+  if(hit){dup.push(q);return}gs.forEach(g=>seen.set(g+'|'+q.sub+'|'+k,q))});
+ return dup}
+async function admDelDups(){const d=admDupList();if(!d.length)return toast('ماكو تكرار ✓');
+ if(!confirm('راح نحذف '+toAr(d.length)+' سؤال مكرر (تبقى نسخة وحدة من كل سؤال). نكمل؟'))return;
+ try{const ids=d.map(q=>q.id);for(let i=0;i<ids.length;i+=200)await AST.delQ(ids.slice(i,i+200));admRebuild();try{IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}catch(e){}toast('انحذف '+toAr(d.length)+' مكرر ✓')}catch(e){toast('خطأ: '+(e.message||e))}render()}
+(function(){const wrap=n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){const h=f.apply(this,arguments);let c=0;try{c=admDupList().length}catch(e){}
+  return (c?`<div class="dupc"><div><b>🧹 عندك ${toAr(c)} سؤال مكرر</b><small>نفس السؤال انضاف أكثر من مرة لنفس المادة والصف. للطالب يطلع مرة وحدة، بس تگدر تنظّفهم من القاعدة.</small></div><button class="btnp" onclick="admDelDups()">احذف المكرر</button></div>`:'')+h}};
+ wrap('adQs');wrap('adDash')})();
+
+/* مجموعات الأسئلة: السؤال المكرر داخل المجموعة يطلع مرة وحدة */
+(function(){if(typeof qsItems!=='function')return;const _q=qsItems;qsItems=function(){const r=_q.apply(this,arguments);if(!Array.isArray(r))return r;const S=new Set();return r.filter(x=>{const k=dKey(x);if(!k)return true;if(S.has(k))return false;S.add(k);return true})}})();
+
+/* ---------- ٤) البحث الحقيقي بالفلاتر ---------- */
+const SKG=[['','الكل'],['def','تعاريف'],['why','تعليل'],['mcq','اختيارات'],['tf','صح وخطأ'],['blank','فراغات'],['open','مقالي']];
+const OPENK=['tr','fn','loc','diff','fix','ext','irab','calc','psg'];
+function sStem(t){let s=t;if(s.length>4)s=s.replace(/^(وال|بال|كال|فال|لل|ال)/,'');if(s.length>4)s=s.replace(/^[وفبل](?=ال)/,'').replace(/^ال/,'');if(s.length>4)s=s.replace(/(ات|ون|ين|ها|هم|ه|ي)$/,'');return s}
+function sToks(q){return NK(q).split(' ').filter(t=>t.length>1).map(t=>({t,s:sStem(t)}))}
+function sHit(tok,txt){return txt.includes(tok.t)||(tok.s.length>=3&&txt.includes(tok.s))}
+function sState(){V.sf=V.sf||{s:'',k:'',wz:0,u:'',w:'all'};return V.sf}
+function searchAll(qs){const F=sState(),toks=sToks(qs);const g=GR[U.grade];if(!g)return {qs:[],nav:[]};
+ const full=NK(qs);const need=toks.length>=3?Math.ceil(toks.length*.6):toks.length;
+ const nav=[],out=[],seen=new Set();
+ (F.s?[F.s]:g.subs).forEach(s=>{if(!SUB[s])return;const sn=NK(SUB[s].n);
+  if(!F.s&&toks.length&&toks.every(t=>sHit(t,sn)))nav.push({s,t:SUB[s].n,ic:SUB[s].ic});
+  (unitsFor(U.grade,s)||[]).forEach((u,ui)=>{if(F.u!==''&&F.s&&+F.u!==ui)return;const un=NK(u.n);
+   if(toks.length&&toks.every(t=>sHit(t,un)))nav.push({s,ui,t:u.n,sub:SUB[s].n});
+   u.ls.forEach(l=>{if(!l.implicit&&l.n!==u.n){const ln=NK(l.n);if(toks.length&&toks.every(t=>sHit(t,ln)))nav.push({s,ui,t:l.n,sub:SUB[s].n+' · '+u.n})}
+    l.q.forEach(x=>{if(x.der||x.gen||x.k==='dna')return;
+     if(F.k){if(F.k==='open'){if(!OPENK.includes(x.k))return}else if(x.k!==F.k)return}
+     if(F.wz&&!x.wz)return;
+     const k=dKey(x)||Math.random();if(seen.has(k))return;
+     const hq=NK(x.k==='psg'?x.text:x.q),ha=NK(x.k==='psg'?(x.subs||[]).map(y=>(y.q||'')+' '+rawAns(y)).join(' '):rawAns(x));
+     const txt=F.w==='q'?hq:F.w==='a'?ha:hq+' '+ha;
+     let m=0,mq=0;toks.forEach(t=>{if(sHit(t,txt)){m++;if(sHit(t,hq))mq++}});if(!toks.length||m<need)return;
+     seen.add(k);
+     const sc=m*10+mq*3+(full.length>3&&hq.includes(full)?15:0)+(hq.startsWith(toks[0].t)?2:0)+(x.wz?.5:0);
+     out.push({sc,s,ui,u:u.n,l:l.n,x})})})})});
+ const nv=[],ns=new Set();nav.forEach(n=>{const k=n.s+'|'+NK(n.t);if(!ns.has(k)){ns.add(k);nv.push(n)}});
+ return {qs:out.sort((a,b)=>b.sc-a.sc),nav:nv.slice(0,8)}}
+function sHL(text,toks){let h=esc(String(text==null?'':text));if(!toks.length)return h;
+ const map={'ا':'[اأإآٱ]','ه':'[هة]','ي':'[يىئ]','و':'[وؤ]'};
+ const pats=toks.map(t=>(t.s.length>=3?t.s:t.t)).filter(t=>t.length>=2).sort((a,b)=>b.length-a.length).map(t=>[...t].map(c=>(map[c]||c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))).join('[\\u064B-\\u0652ـ]*'));
+ if(!pats.length)return h;try{return h.replace(new RegExp('('+pats.join('|')+')','gi'),'<mark>$1</mark>')}catch(e){return h}}
+function sRecent(){return LS.get('srh',[])}
+function sRemember(q){q=String(q||'').trim();if(NK(q).length<2)return;const r=sRecent().filter(x=>x!==q);r.unshift(q);LS.set('srh',r.slice(0,6))}
+function sSet(k,v){const F=sState();F[k]=v;if(k==='s')F.u='';V.spg=1;sRefresh(true)}
+function sRefresh(full){if(full){const f=document.getElementById('sfl');if(f)f.innerHTML=sFiltersHTML()}const r=document.getElementById('sres');if(r)r.innerHTML=searchResHTML()}
+function sFiltersHTML(){const F=sState(),g=GR[U.grade];const ch=(on,js,t,c)=>`<button class="sch ${on?'on':''}" ${c?`style="--sc:${c}"`:''} onclick="${js}">${t}</button>`;
+ const us=F.s?(unitsFor(U.grade,F.s)||[]):[];
+ return `<div class="srow">${ch(!F.s,"sSet('s','')",'كل المواد')}${g.subs.filter(s=>SUB[s]).map(s=>ch(F.s===s,`sSet('s','${s}')`,esc(SUB[s].n.replace(/^اللغة /,'')),SUB[s].c)).join('')}</div>
+ ${us.length?`<div class="srow"><select class="ssel" onchange="sSet('u',this.value)"><option value="">كل الفصول</option>${us.map((u,i)=>`<option value="${i}" ${String(F.u)===String(i)?'selected':''}>${esc(u.n)}</option>`).join('')}</select></div>`:''}
+ <div class="srow">${SKG.map(([k,t])=>ch(F.k===k,`sSet('k','${k}')`,t)).join('')}</div>
+ <div class="srow">${ch(F.wz,`sSet('wz',${F.wz?0:1})`,'⭐ وزاري فقط')}${ch(F.w==='all',"sSet('w','all')",'بالسؤال والجواب')}${ch(F.w==='q',"sSet('w','q')",'بالسؤال بس')}${ch(F.w==='a',"sSet('w','a')",'بالجواب بس')}</div>`}
+function sOpenSub(s){V.sub=s;go('sub')}
+function sToggle(i){const e=document.getElementById('sa'+i);if(e)e.classList.toggle('open')}
+function searchResHTML(){const qs=V.sq||'',F=sState();
+ if(NK(qs).length<2){const r=sRecent();const g=GR[U.grade];const sug=[];g.subs.slice(0,4).forEach(s=>{const u=(unitsFor(U.grade,s)||[])[0];if(u)sug.push(u.n)});
+  return `${r.length?`<div class="sgh">آخر بحث <button onclick="LS.set('srh',[]);sRefresh()">مسح</button></div><div class="srow">${r.map(x=>`<button class="sch" onclick="sPut(${JSON.stringify(x).replace(/"/g,'&quot;')})">🕘 ${esc(x)}</button>`).join('')}</div>`:''}
+  <div class="empty">اكتب كلمة من السؤال أو الجواب، وفلتر بالمادة أو نوع السؤال… مثلاً «التمثيل الغذائي» أو «الخلية»</div>`}
+ const R=searchAll(qs);const toks=sToks(qs);
+ if(!R.qs.length&&!R.nav.length)return `<div class="empty">ما لگينا نتيجة 🤔 جرّب كلمة ثانية أو شيل الفلاتر${F.s||F.k||F.wz?` <button class="sch" style="margin-top:8px" onclick="V.sf={s:'',k:'',wz:0,u:'',w:'all'};sRefresh(true)">شيل الفلاتر</button>`:''}</div>`;
+ const pg=V.spg||1,per=25,show=R.qs.slice(0,pg*per);
+ return `${R.nav.length?`<div class="sgh">مواد وفصول</div><div class="snav">${R.nav.map(n=>`<button onclick="sOpenSub('${n.s}')"><b>${sHL(n.t,toks)}</b>${n.sub?`<small>${esc(n.sub)}</small>`:''}<span>←</span></button>`).join('')}</div>`:''}
+ ${R.qs.length?`<div class="sgh">${toAr(R.qs.length)} سؤال</div>`:''}
+ ${show.map((r,i)=>{const x=r.x;const isP=x.k==='psg';
+  return `<div class="sres"><div class="srh"><span class="kt" style="background:${SUB[r.s].c}">${esc(SUB[r.s].n)}</span><span class="kt2">${KNM2[x.k]||(isP?'قطعة':'')}</span>${x.wz?'<span class="kt3">وزاري</span>':''}</div>
+  <b>${x.k==='def'?'عرّف: ':''}${sHL(stripWz(isP?x.text:x.q||''),toks)}</b>${x.k==='mcq'?`<div class="sro">${x.o.map((o,j)=>`<span class="${j===(x.a||0)?'r':''}">${esc(String(o))}</span>`).join('')}</div>`:''}
+  ${isP?'':`<button class="sshow" onclick="sToggle(${i})">👁️ اظهر الجواب</button><div class="sra sans" id="sa${i}"><small>الجواب</small>${sHL(String(rawAns(x)),toks)}</div>`}
+  <div class="srf">${esc(r.u)}${r.l&&r.l!==r.u?' · '+esc(r.l):''}</div></div>`}).join('')}
+ ${R.qs.length>show.length?`<button class="btns smore" onclick="V.spg=(V.spg||1)+1;sRefresh()">عرض المزيد (${toAr(R.qs.length-show.length)})</button>`:''}`}
+function sPut(q){V.sq=q;V.spg=1;const i=document.getElementById('sqi');if(i)i.value=q;sRefresh()}
+searchRun=function(qs){return searchAll(qs).qs.slice(0,40)};
+searchV=function(){sState();return `<div class="top"><button class="back" style="position:static" onclick="go('home')">${I('back')}</button><div class="hi"><small>${esc(GR[U.grade].n)}</small><b style="font-size:22px">البحث</b></div></div>
+ <div class="pad"><div class="sbox">🔍<input id="sqi" type="search" enterkeyhint="search" autocomplete="off" placeholder="ابحث بكل أسئلة صفّك…" value="${esc(V.sq||'')}" oninput="clearTimeout(V.sqt);V.sq=this.value;V.spg=1;V.sqt=setTimeout(()=>{sRefresh();clearTimeout(V.sqr);V.sqr=setTimeout(()=>sRemember(V.sq),1500)},220)" onkeydown="if(event.key==='Enter'){sRemember(this.value);this.blur()}">${V.sq?`<button class="sclr" onclick="sPut('');document.getElementById('sqi').focus()">✕</button>`:''}</div>
+ <div id="sfl">${sFiltersHTML()}</div>
+ <div id="sres">${searchResHTML()}</div><div style="height:90px"></div></div>`};
 /* ---------- تشغيل ---------- */
 // نسخة الأسئلة تنحفظ بـ IndexedDB (مساحتها كبيرة) بدل localStorage حتى ما تمتلي ذاكرة المتصفح
 const IDB={db:null,open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('saffi',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))},
@@ -7083,20 +7252,34 @@ window.addEventListener('hashchange',()=>{if(location.hash==='#admin')go('admin'
  buildCUR=function(){const snap=[];try{if(typeof U!=='undefined'&&U.grade&&V.sub)['eb','qb'].forEach(t=>{if(V[t]&&V[t].ls){const st=stats(U.grade,V.sub);snap.push([t,toNames(U.grade,V.sub,V[t].ls),V[t].ls.length===allKeys(st).length])}})}catch(e){}
   _bc.apply(this,arguments);
   try{snap.forEach(([t,nm,all])=>{if(!V[t])return;V[t].ls=all?allKeys(stats(U.grade,V.sub)):toKeys(U.grade,V.sub,nm)})}catch(e){}}})();
+/* تحميل سريع: نجيب الإعدادات والأسئلة مباشرة (بدون انتظار المكتبة) وكل الصفحات سوا */
+async function restLoad(){const base=SBCFG.SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/',k=SBCFG.SUPABASE_ANON_KEY;
+ const h={apikey:k,Authorization:'Bearer '+k,Accept:'application/json'};const step=1000;
+ const cfgP=fetch(base+'site_config?id=eq.main&select=data',{headers:h}).then(r=>r.ok?r.json():null).catch(()=>null);
+ const qurl=o=>base+'questions?select=*&active=eq.true&order=id.asc&offset='+o+'&limit='+step;
+ const r1=await fetch(qurl(0),{headers:Object.assign({Prefer:'count=exact'},h)});if(!r1.ok)throw new Error('rest '+r1.status);
+ let rows=await r1.json();const cr=r1.headers.get('content-range')||'';const tot=+(cr.split('/')[1]||0);
+ if(rows.length===step){
+  if(tot>step){const ps=[];for(let o=step;o<tot;o+=step)ps.push(fetch(qurl(o),{headers:h}).then(r=>{if(!r.ok)throw new Error('rest');return r.json()}));(await Promise.all(ps)).forEach(x=>rows=rows.concat(x))}
+  else{let o=step;for(;;){const r=await fetch(qurl(o),{headers:h});if(!r.ok)throw new Error('rest');const x=await r.json();rows=rows.concat(x);if(x.length<step)break;o+=step}}}
+ const c=await cfgP;if(c&&c[0]&&c[0].data)ADM.cfg=admMerge(c[0].data);ADM.qs=rows.map(rowToQ);ADM.loaded=true;return true}
 (async function boot(){
- if(!SB){const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}ADM.loaded=true}
+ if(!HASB){const d=LS.get('adm',null);if(d){ADM.cfg=admMerge(d.cfg);ADM.qs=d.qs||[]}ADM.loaded=true}
  else{
-  // آخر نسخة محفوظة بالجهاز تطلع فوراً، وللزائر الجديد نعرض شاشة تحميل لحد ما توصل الهوية الصحيحة
+  // آخر نسخة محفوظة بالجهاز تطلع فوراً، والزائر الجديد ينتظر بس الإعدادات والأسئلة (تنزل سوا)
   SEEN.free();let c=null;try{c=await IDB.get('cache')}catch(e){}
   if(c&&c.cfg){ADM.cfg=admMerge(c.cfg);ADM.qs=c.qs||[]}
   else{const a=document.getElementById('app');if(a)a.innerHTML='<div class="splash"><i></i></div>';
-   await Promise.race([AST.load(),new Promise(r=>setTimeout(r,12000))])}
+   let got=false;try{got=await Promise.race([restLoad(),new Promise(r=>setTimeout(()=>r(false),9000))])}catch(e){}
+   if(got)IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs})}
  }
  buildCUR();applyTheme();bootRoute();if(/^#c=/.test(location.hash))chalInit();else render();
- if(SB){
+ if(HASB){
   const before=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
-  await Promise.all([AST.load(),admSession()]);
-  IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs});
+  await SBP;
+  if(SB)await Promise.all([AST.load(),admSession()]);
+  else{try{await restLoad()}catch(e){}ADM.loaded=true}
+  if(ADM.qs.length||ADM.cfg)IDB.set('cache',{cfg:ADM.cfg,qs:ADM.qs});
   const after=JSON.stringify(ADM.cfg)+'|'+ADM.qs.length;
   if(before!==after||V.scr==='admin'){buildCUR();applyTheme();if(V.scr!=='exam'&&V.scr!=='chal')render()}
  }
