@@ -1015,6 +1015,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .hs{flex:0 0 100%;scroll-snap-align:center;position:relative;min-height:190px;border-radius:22px;overflow:hidden;background:linear-gradient(120deg,#1b3a9e 0%,#172a7a 55%,#0e1a57 100%);color:#fff;padding:20px 18px 30px}
 .hs .txt{position:relative;z-index:2;width:62%}
 .hs h2{font:800 28px/1.15 Alexandria,sans-serif;margin:0;color:#fff}
+.hbd{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff;font:700 12.5px/1 inherit;padding:6px 11px;border-radius:999px;margin-bottom:10px}.hbd::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--yel,#F5B82E)}
 .hs h3{font:700 16.5px/1.4 Alexandria,sans-serif;margin:6px 0 4px;color:#fff}
 .hs p{font-size:11.5px;margin:0 0 10px;opacity:.85;line-height:1.6}
 .hs .go{background:var(--yel);color:#0e1a57;font-weight:700;font-size:13.5px;border-radius:999px;height:36px;padding:0 18px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 6px 12px -6px #0008}
@@ -5500,7 +5501,7 @@ const AT=[['dash','الرئيسية','layers'],['qs','الأسئلة','file'],['
 V.ad=V.ad||{t:'dash',g:'m3',s:null,f:{u:'',l:'',k:'',src:'',q:'',pg:0},form:null,imp:'',pb:null};
 function allGrades(){return G0.flatMap(st=>st.g.map(x=>x[0]))}
 function adSubs(gk){return (GR[gk]||{subs:[]}).subs}
-function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (١٨)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
+function adTitleBar(){return `<div class="adtop"><button class="x" onclick="location.hash='';go('home')">${I('back')}</button><div><b>لوحة الإدارة</b><small>${SB?(ADM.user?ADM.user.email:''):'وضع تجريبي — التغييرات محفوظة بهذا الجهاز فقط'} · إصدار ٢٦/١١ (١٩)</small></div>${SB&&ADM.user?`<button class="gpill" onclick="admLogout()">خروج</button>`:''}</div>`}
 function admV(){
  if(!ADM.loaded)return `${adTitleBar()}<div class="empty" style="margin-top:20px">جاري التحميل…</div>`;
  if(SB&&!ADM.user)return adLoginV();
@@ -6912,7 +6913,7 @@ function homeTiles(){const u=UIc();const T=u.tiles.filter(x=>gOK(x)&&actOK(x.act
 /* البانر */
 function heroSlides(u){u=u||UIc();const nm=esc(u.name||'صفّي');const out=[];
  u.slides.filter(gOK).forEach(s=>{const bg=s.theme?`style="background:${THEMES[s.theme]||THEMES.navy}"`:'';
-  if(s.kind==='welcome')out.push(`<div class="hs" ${bg}><div class="txt"><h2>${nm} ..</h2><h3>${esc(T('hero.title'))}</h3><p>${esc(T('hero.sub'))}</p><button class="go" onclick="go('subs')">${esc(T('hero.btn'))} <span>←</span></button></div>${s.img?`<img class="art im" src="${s.img}" alt="">`:u.logo?`<img class="art im" src="${u.logo}" alt="">`:HERO_ART.books}</div>`);
+  if(s.kind==='welcome'){const g=GR[U.grade];let tot=0;try{tot=g?g.subs.reduce((a,x)=>a+(stats(U.grade,x).total||0),0):0}catch(e){}const bdg=tot?`<span class="hbd">${esc(String(T('hero.badge')||'{n} سؤال لصفك').replace('{n}',toAr(tot)))}</span>`:'';out.push(`<div class="hs" ${bg}><div class="txt">${bdg}<h2>${nm} ..</h2><h3>${esc(T('hero.title'))}</h3><p>${esc(T('hero.sub'))}</p><button class="go" onclick="go('subs')">${esc(T('hero.btn'))} <span>←</span></button></div>${s.img?`<img class="art im" src="${s.img}" alt="">`:u.logo?`<img class="art im" src="${u.logo}" alt="">`:HERO_ART.books}</div>`)}
   else if(s.kind==='count'){const d=daysToWiz();if(d!=null)out.push(`<div class="hs s2" ${bg}><div class="txt"><h3>باقي على الوزاري</h3><div class="bign">${toAr(d)} يوم</div><p>خطة اليوم جاهزة إلك</p><button class="go" onclick="document.querySelector('.cdc,.cntc,.count')?.scrollIntoView({behavior:'smooth',block:'center'})">شوف خطتي <span>←</span></button></div>${HERO_ART.cal(toAr(d))}</div>`)}
   else if(s.kind==='blitz')out.push(`<div class="hs s3" ${bg}><div class="txt"><h3>تحدي الدقيقة ⚡</h3><p>٦٠ ثانية، كم سؤال تكدر تجاوب؟</p><button class="go" onclick="pickSub('blitz')">العب هسه <span>←</span></button></div>${HERO_ART.clock}</div>`);
   else if(s.kind==='custom'&&actOK(s.act))out.push(`<div class="hs" style="background:${THEMES[s.theme]||THEMES.navy}"><div class="txt">${s.title?`<h2 style="font-size:24px">${esc(s.title)}</h2>`:''}${s.h3?`<h3>${esc(s.h3)}</h3>`:''}${s.p?`<p>${esc(s.p)}</p>`:''}${s.btn?`<button class="go" onclick="${actJS(s.act)}">${esc(s.btn)} <span>←</span></button>`:''}</div>${s.img?`<img class="art im" src="${s.img}" alt="">`:''}</div>`)});
